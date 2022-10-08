@@ -27,12 +27,17 @@ public:
 	void EnableImgui() noexcept;
 	void DisableImgui() noexcept;
 	bool IsImguiEnabled() const noexcept;
+	void SetWireframeMode() noexcept;
+	void SetFillMode() noexcept;
 private:
+	void InitRenderStates() noexcept;
 	Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDSV;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> pWireFrame_RS;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> pFill_RS;
 	
 	DirectX::XMMATRIX projection;
 	DirectX::XMMATRIX camera;

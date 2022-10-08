@@ -35,6 +35,9 @@
     <Filter Include="Source\Windows">
       <UniqueIdentifier>{deb8d18f-12d9-43b0-b33d-d66335d46c16}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Graphics\Shapes">
+      <UniqueIdentifier>{215ff520-0bfe-41bd-905a-84b239ff02be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window.cpp">
@@ -150,9 +153,6 @@
     <ClInclude Include="Source\Box.h">
       <Filter>Source\Graphics\Drawables</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Cube.h">
-      <Filter>Source\Graphics\Drawables</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Drawable.h">
       <Filter>Source\Graphics\Drawables</Filter>
     </ClInclude>
@@ -215,6 +215,9 @@
     </ClInclude>
     <ClInclude Include="Source\imgui\imstb_truetype.h">
       <Filter>IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Cube.h">
+      <Filter>Source\Graphics\Shapes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

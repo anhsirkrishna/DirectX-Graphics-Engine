@@ -92,6 +92,11 @@ void App::SpawnSimulationWindow() noexcept
 		ImGui::SliderFloat("Speed Factor", &speed_factor, 0.0f, 6.0f, "%.4f", 3.2f);
 		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("Status: %s", window.keyboard.isKeyPressed(VK_SPACE) ? "PAUSED" : "RUNNING (hold spacebar to pause)");
+		if (ImGui::Button("Wireframe mode"))
+			window.Gfx().SetWireframeMode();
+
+		if (ImGui::Button("Fill mode"))
+			window.Gfx().SetFillMode();
 	}
 	ImGui::End();
 }

@@ -101,6 +101,8 @@ Graphics::Graphics(HWND hWnd, int width, int height)
 	vp.TopLeftY = 0.0f;
 	pContext->RSSetViewports(1u, &vp);
 
+	InitRenderStates();
+
 	// init imgui d3d impl
 	ImGui_ImplDX11_Init(pDevice.Get(), pContext.Get());
 }
@@ -168,4 +170,29 @@ void Graphics::DisableImgui() noexcept {
 
 bool Graphics::IsImguiEnabled() const noexcept {
 	return imguiEnabled;
+}
+
+void Graphics::SetWireframeMode() noexcept {
+	pContext->RSSetState(pWireFrame_RS.Get());
+}
+
+void Graphics::SetFillMode() noexcept {
+	pContext->RSSetState(pFill_RS.Get());
+}
+
+void Graphics::InitRenderStates() noexcept {
+	D3D11_RASTERIZER_DESC wf_desc;
+	ZeroMemory(&wf_desc, sizeof(D3D11_RASTERIZER_DESC));
+	wf_desc.FillMode = D3D11_FILL_WIREFRAME;
+	wf_desc.CullMode = D3D11_CULL_NONE;
+	wf_desc.DepthClipEnable = true;
+
+	pDevice->CreateRasterizerState(&wf_desc, &pWireFrame_RS);
+
+	ZeroMemory(&wf_desc, sizeof(D3D11_RASTERIZER_DESC));
+	wf_desc.FillMode = D3D11_FILL_SOLID;
+	wf_desc.CullMode = D3D11_CULL_BACK;
+	wf_desc.DepthClipEnable = true;
+
+	pDevice->CreateRasterizerState(&wf_desc, &pFill_RS);
 }
