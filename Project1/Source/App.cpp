@@ -80,7 +80,7 @@ void App::Update() {
 	}
 
 	SpawnSimulationWindow();
-
+	cam.SpawnCameraControls();
 	window.Gfx().SwapBuffer();
 }
 
