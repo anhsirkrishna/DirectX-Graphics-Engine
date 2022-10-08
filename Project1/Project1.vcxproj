@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{165b6690-24c1-4ada-a063-119b6a43bc35}</ProjectGuid>
+    <RootNamespace>Project1</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)\Build\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\$(ProjectName)\Intermediate\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)\Build\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\$(ProjectName)\Intermediate\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>D3DCompiler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>D3DCompiler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\ImGUIManager.cpp" />
+    <ClCompile Include="Source\imgui\imgui.cpp" />
+    <ClCompile Include="Source\imgui\imgui_demo.cpp" />
+    <ClCompile Include="Source\imgui\imgui_draw.cpp" />
+    <ClCompile Include="Source\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Source\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="Source\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Source\InputLayout.cpp" />
+    <ClCompile Include="Source\Box.cpp" />
+    <ClCompile Include="Source\Camera.cpp" />
+    <ClCompile Include="Source\PixelShader.cpp" />
+    <ClCompile Include="Source\Drawable.cpp" />
+    <ClCompile Include="Source\IndexBuffer.cpp" />
+    <ClCompile Include="Source\Bindable.cpp" />
+    <ClCompile Include="Source\Graphics.cpp" />
+    <ClCompile Include="Source\App.cpp" />
+    <ClCompile Include="Source\Mouse.cpp" />
+    <ClCompile Include="Source\Keyboard.cpp" />
+    <ClCompile Include="Source\WinMain.cpp" />
+    <ClCompile Include="Source\Window.cpp" />
+    <ClCompile Include="Source\VertexBuffer.cpp" />
+    <ClCompile Include="Source\TransformCBuf.cpp" />
+    <ClCompile Include="Source\VertexShader.cpp" />
+    <ClCompile Include="Source\Topology.cpp" />
+    <ClCompile Include="Source\TimerWrap.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\ImGUIManager.h" />
+    <ClInclude Include="Source\imgui\imconfig.h" />
+    <ClInclude Include="Source\imgui\imgui.h" />
+    <ClInclude Include="Source\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="Source\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="Source\imgui\imgui_internal.h" />
+    <ClInclude Include="Source\imgui\imstb_rectpack.h" />
+    <ClInclude Include="Source\imgui\imstb_textedit.h" />
+    <ClInclude Include="Source\imgui\imstb_truetype.h" />
+    <ClInclude Include="Source\InputLayout.h" />
+    <ClInclude Include="Source\Box.h" />
+    <ClInclude Include="Source\Camera.h" />
+    <ClInclude Include="Source\Cube.h" />
+    <ClInclude Include="Source\DrawableBase.h" />
+    <ClInclude Include="Source\IndexedTriangleList.h" />
+    <ClInclude Include="Source\MathWrap.h" />
+    <ClInclude Include="Source\PixelShader.h" />
+    <ClInclude Include="Source\Drawable.h" />
+    <ClInclude Include="Source\ConstantBuffers.h" />
+    <ClInclude Include="Source\IndexBuffer.h" />
+    <ClInclude Include="Source\BindableBase.h" />
+    <ClInclude Include="Source\Bindable.h" />
+    <ClInclude Include="Source\Graphics.h" />
+    <ClInclude Include="Source\App.h" />
+    <ClInclude Include="Source\Mouse.h" />
+    <ClInclude Include="Source\Keyboard.h" />
+    <ClInclude Include="Source\LeanWindows.h" />
+    <ClInclude Include="Source\TestObject.h" />
+    <ClInclude Include="Source\Window.h" />
+    <ClInclude Include="Source\VertexBuffer.h" />
+    <ClInclude Include="Source\TransformCBuf.h" />
+    <ClInclude Include="Source\VertexShader.h" />
+    <ClInclude Include="Source\Topology.h" />
+    <ClInclude Include="Source\TimerWrap.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Source\SolidPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Source\SolidVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

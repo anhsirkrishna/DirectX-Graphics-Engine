@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{785b1e95-649a-413a-82e9-9f2b3ce55c76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="IMGUI">
+      <UniqueIdentifier>{f2422001-b5d9-4352-8d95-e78bf86b8894}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Graphics">
+      <UniqueIdentifier>{c89290e4-03ab-407f-93b4-e0777c3487e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Graphics\Bindables">
+      <UniqueIdentifier>{46640967-b06c-4476-b4b1-c7b0499f75d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Graphics\Drawables">
+      <UniqueIdentifier>{a45fca14-e432-47db-bb93-a7535b00cccf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GUI">
+      <UniqueIdentifier>{9f6b5541-fe4c-49d1-a67f-181a00cca60b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Input">
+      <UniqueIdentifier>{8165ddb9-dfbd-4578-8fbd-79c2f7732c4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Shaders">
+      <UniqueIdentifier>{0caef130-fbd4-41c8-9ef8-ca3cc1b7aef7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utils">
+      <UniqueIdentifier>{f97884d2-20f7-49f8-a691-def2096afb4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Windows">
+      <UniqueIdentifier>{deb8d18f-12d9-43b0-b33d-d66335d46c16}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Window.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\App.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Keyboard.cpp">
+      <Filter>Source\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mouse.cpp">
+      <Filter>Source\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGUIManager.cpp">
+      <Filter>Source\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Camera.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TimerWrap.cpp">
+      <Filter>Source\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Drawable.cpp">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Box.cpp">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Bindable.cpp">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\VertexBuffer.cpp">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\VertexShader.cpp">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TransformCBuf.cpp">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Topology.cpp">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\InputLayout.cpp">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\IndexBuffer.cpp">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PixelShader.cpp">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\WinMain.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\imgui\imgui.cpp">
+      <Filter>IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\imgui\imgui_demo.cpp">
+      <Filter>IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\imgui\imgui_draw.cpp">
+      <Filter>IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\imgui\imgui_impl_dx11.cpp">
+      <Filter>IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\imgui\imgui_impl_win32.cpp">
+      <Filter>IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\imgui\imgui_widgets.cpp">
+      <Filter>IMGUI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Bindable.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\BindableBase.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ConstantBuffers.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\IndexBuffer.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\IndexedTriangleList.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\InputLayout.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PixelShader.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Topology.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\TransformCBuf.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\VertexBuffer.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\VertexShader.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Box.h">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Cube.h">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Drawable.h">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DrawableBase.h">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\TestObject.h">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\TimerWrap.h">
+      <Filter>Source\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mouse.h">
+      <Filter>Source\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Keyboard.h">
+      <Filter>Source\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\App.h">
+      <Filter>Source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Window.h">
+      <Filter>Source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MathWrap.h">
+      <Filter>Source\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LeanWindows.h">
+      <Filter>Source\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ImGUIManager.h">
+      <Filter>Source\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Camera.h">
+      <Filter>Source\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics.h">
+      <Filter>Source\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\imgui\imconfig.h">
+      <Filter>IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\imgui\imgui.h">
+      <Filter>IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\imgui\imgui_impl_dx11.h">
+      <Filter>IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\imgui\imgui_impl_win32.h">
+      <Filter>IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\imgui\imgui_internal.h">
+      <Filter>IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\imgui\imstb_rectpack.h">
+      <Filter>IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\imgui\imstb_textedit.h">
+      <Filter>IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\imgui\imstb_truetype.h">
+      <Filter>IMGUI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Source\SolidPS.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\SolidVS.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
