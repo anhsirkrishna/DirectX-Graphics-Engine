@@ -1,6 +1,7 @@
 #include "App.h"
 #include "Box.h"
 #include "MathWrap.h"
+#include "FBXLoader.h"
 #include <memory>
 #include <algorithm>
 #include <iterator>
@@ -58,7 +59,8 @@ App::App() : window(WindowWidth, WindowHeight, TEXT("Direct3D Engine")) {
 }
 
 int App::Run() {
-	
+	FBXLoader fbx;
+
 	while (true) {
 		if (const auto ecode = Window::ProcessMessages()) {
 			return *ecode;

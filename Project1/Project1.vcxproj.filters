@@ -38,6 +38,21 @@
     <Filter Include="Source\Graphics\Shapes">
       <UniqueIdentifier>{215ff520-0bfe-41bd-905a-84b239ff02be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Animation">
+      <UniqueIdentifier>{3397e051-066f-4da4-b492-65e91efd5a71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math">
+      <UniqueIdentifier>{cfc10619-660e-4c7d-9c07-1eee79c30614}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\FBX">
+      <UniqueIdentifier>{e56c3739-22ae-4f81-a79d-4cecbde21e36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\FBX\Converter">
+      <UniqueIdentifier>{4f3f8f54-d65a-478e-9bd3-041dcd6ea0a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\FBX\Drawables">
+      <UniqueIdentifier>{2e52d0b7-9a80-4901-9b10-b20a2d30d0b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window.cpp">
@@ -114,6 +129,15 @@
     </ClCompile>
     <ClCompile Include="Source\imgui\imgui_widgets.cpp">
       <Filter>IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FBXLoader.cpp">
+      <Filter>Source\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FBXSkeleton.cpp">
+      <Filter>Source\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FBXMatConverter.cpp">
+      <Filter>Source\FBX\Converter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -218,6 +242,18 @@
     </ClInclude>
     <ClInclude Include="Source\Cube.h">
       <Filter>Source\Graphics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Animation.h">
+      <Filter>Source\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXLoader.h">
+      <Filter>Source\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXSkeleton.h">
+      <Filter>Source\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXMatConverter.h">
+      <Filter>Source\FBX\Converter</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,33 @@
+#pragma once
+#include <fbxsdk.h>
+#include <vector>
+#include <string>
+#include "FBXMatConverter.h"
+
+struct FBXBone
+{
+	std::string Name;
+	int ParentIndex;
+	int BoneIndex;
+	FbxNode* BoneNode;
+
+	FbxVector4 BindPos;
+	FbxQuaternion BindRot;
+
+	FbxVector4 BoneSpacePos;
+	FbxQuaternion BoneSpaceRot;
+};
+
+class FBXSkeleton
+{
+public:
+	FBXSkeleton();
+	~FBXSkeleton();
+	void ExtractSkeletonFromScene(FbxNode* p_root_node);
+	void ExtractBindPose(FBXMatConverter& converter);
+	FbxPose* p_bind_pose;
+private:
+	std::vector<FBXBone*> bones;
+	std::vector<FbxNode*> bones_nodes;
+};
+
