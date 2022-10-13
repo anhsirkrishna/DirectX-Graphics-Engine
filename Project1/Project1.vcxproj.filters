@@ -139,6 +139,15 @@
     <ClCompile Include="Source\FBXMatConverter.cpp">
       <Filter>Source\FBX\Converter</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Line.cpp">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Animation.cpp">
+      <Filter>Source\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Quaternion.cpp">
+      <Filter>Source\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Bindable.h">
@@ -254,6 +263,12 @@
     </ClInclude>
     <ClInclude Include="Source\FBXMatConverter.h">
       <Filter>Source\FBX\Converter</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Line.h">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Quaternion.h">
+      <Filter>Source\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

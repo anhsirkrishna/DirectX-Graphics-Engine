@@ -1,7 +1,7 @@
 #include "App.h"
 #include "Box.h"
 #include "MathWrap.h"
-#include "FBXLoader.h"
+#include "FBXMatConverter.h"
 #include <memory>
 #include <algorithm>
 #include <iterator>
@@ -55,12 +55,25 @@ App::App() : window(WindowWidth, WindowHeight, TEXT("Direct3D Engine")) {
 		}
 	}
 
-	window.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 40.0f));
+	window.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 300.0f));
+	DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	draw_line = std::make_unique<Line>(window.Gfx(), color);
+
+
+	FBXSkeleton skele;
+
+	FBXMatConverter converter(fbx_loader.p_Scene);
+	skele.p_bind_pose = fbx_loader.p_Scene->GetPose(0);
+	FbxNode* rootNode = fbx_loader.p_Scene->GetRootNode();
+
+	skele.ExtractSkeletonFromScene(rootNode);
+	skele.ExtractBindPose(converter);
+
+	draw_skeleton = std::make_unique<Skeleton>();
+	draw_skeleton->ConvertFromFbx(window.Gfx(), &skele);
 }
 
 int App::Run() {
-	FBXLoader fbx;
-
 	while (true) {
 		if (const auto ecode = Window::ProcessMessages()) {
 			return *ecode;
@@ -80,7 +93,8 @@ void App::Update() {
 		d->Update(window.keyboard.isKeyPressed(VK_SPACE) ? 0.0f : dt);
 		d->Draw(window.Gfx());
 	}
-
+	
+	//draw_skeleton->Draw(window.Gfx());
 	SpawnSimulationWindow();
 	cam.SpawnCameraControls();
 	window.Gfx().SwapBuffer();

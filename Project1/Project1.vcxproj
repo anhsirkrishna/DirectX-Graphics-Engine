@@ -88,6 +88,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Quaternion.cpp" />
+    <ClCompile Include="Source\Animation.cpp" />
+    <ClCompile Include="Source\Line.cpp" />
     <ClCompile Include="Source\FBXMatConverter.cpp" />
     <ClCompile Include="Source\FBXSkeleton.cpp" />
     <ClCompile Include="Source\FBXLoader.cpp" />
@@ -118,6 +121,8 @@
     <ClCompile Include="Source\TimerWrap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Quaternion.h" />
+    <ClInclude Include="Source\Line.h" />
     <ClInclude Include="Source\FBXMatConverter.h" />
     <ClInclude Include="Source\FBXSkeleton.h" />
     <ClInclude Include="Source\FBXLoader.h" />

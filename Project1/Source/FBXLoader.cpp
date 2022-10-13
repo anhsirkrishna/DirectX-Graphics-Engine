@@ -1,7 +1,4 @@
 #include "FBXLoader.h"
-#include "FBXSkeleton.h"
-#include "FBXMatConverter.h"
-#include <fbxsdk.h>
 
 /* Tab character ("\t") counter */
 int numTabs = 0;
@@ -100,7 +97,7 @@ FBXLoader::FBXLoader() {
 	const char* filename = "Tad.fbx";
 
 	// Initialize the SDK manager. This object handles memory management.
-	FbxManager* fbx_sdk_manager = FbxManager::Create();
+	fbx_sdk_manager = FbxManager::Create();
 
 	// Create the IO settings object.
 	FbxIOSettings* ios = FbxIOSettings::Create(fbx_sdk_manager, IOSROOT);
@@ -117,23 +114,16 @@ FBXLoader::FBXLoader() {
 	}
 
 	// Create a new scene so that it can be populated by the imported file.
-	FbxScene* lScene = FbxScene::Create(fbx_sdk_manager, "myScene");
+	p_Scene = FbxScene::Create(fbx_sdk_manager, "myScene");
 
 	// Import the contents of the file into the scene.
-	lImporter->Import(lScene);
+	lImporter->Import(p_Scene);
 
 	// The file is imported, so get rid of the importer.
 	lImporter->Destroy();
+}
 
-	FBXSkeleton skele;
-	
-	FBXMatConverter converter(lScene);
-	skele.p_bind_pose = lScene->GetPose(0);
-	FbxNode* rootNode = lScene->GetRootNode();
-
-	skele.ExtractSkeletonFromScene(rootNode);
-	skele.ExtractBindPose(converter);
-
+FBXLoader::~FBXLoader() {
 	// Destroy the SDK manager and all the other objects it was handling.
 	fbx_sdk_manager->Destroy();
 }
