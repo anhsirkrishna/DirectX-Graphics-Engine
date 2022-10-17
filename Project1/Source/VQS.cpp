@@ -1,5 +1,14 @@
 #include "VQS.h"
 
+//Lerp between two Vec3
+dx::XMFLOAT3 Lerp(const dx::XMFLOAT3& v_0, const  dx::XMFLOAT3& v_n, float t) {
+	return dx::XMFLOAT3(
+		(1 - t) * v_0.x + t * v_n.x,
+		(1 - t) * v_0.y + t * v_n.y,
+		(1 - t) * v_0.z + t * v_n.z
+	);
+}
+
 VQS::VQS() : v(0.0f, 0.0f, 0.0f), q(), s(1.0f) {
 }
 
@@ -50,5 +59,16 @@ void VQS::SetV(const dx::XMFLOAT3& _v) {
 
 void VQS::SetQ(const dx::XMFLOAT3& _v) {
 	q = Quaternion(0, _v);
+}
+
+dx::XMMATRIX VQS::toMatrix() const {	
+	return q.toMatrix() * dx::XMMatrixTranslation(v.x, v.y, v.z);
+}
+
+VQS VQS::InterpolateTo(const VQS& vqs_n, float t) {
+	return VQS(
+		Lerp(v, vqs_n.v, t), 
+		q.InterpolateTo(vqs_n.q, t), 
+		1.0f);
 }
 

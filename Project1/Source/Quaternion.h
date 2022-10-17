@@ -19,6 +19,8 @@ public:
 	dx::XMVECTOR Rotate(const dx::XMVECTOR& p) const;
 	dx::XMMATRIX toMatrix() const;
 	static Quaternion fromMatrix(const dx::XMMATRIX& _mat);
+
+	Quaternion InterpolateTo(const Quaternion& q_n, float t);
 private:
 	float s;
 	dx::XMFLOAT3 v;

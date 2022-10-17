@@ -18,7 +18,7 @@ Mesh::Mesh(Graphics& gfx, FBXMesh& fbx_mesh) {
 			dx::XMFLOAT3 norm;
 			dx::XMFLOAT2 tex;
 			dx::XMFLOAT4 w;
-			dx::XMINT4 i;
+			dx::XMUINT4 i;
 		};
 
 		FBXMeshVertices& mesh = fbx_mesh.mesh;
@@ -36,7 +36,7 @@ Mesh::Mesh(Graphics& gfx, FBXMesh& fbx_mesh) {
 			vertex.norm = dx::XMFLOAT3(v.normal[0], v.normal[1], v.normal[2]);
 			vertex.tex = dx::XMFLOAT2(v.texture[0], 1.0f - v.texture[1]);
 			vertex.w = dx::XMFLOAT4(weights[0].weight, weights[1].weight, weights[2].weight, weights[3].weight);
-			vertex.i = dx::XMINT4(weights[0].index, weights[1].index, weights[2].index, weights[3].index);
+			vertex.i = dx::XMUINT4(weights[0].index, weights[1].index, weights[2].index, weights[3].index);
 			vertices.push_back(vertex);
 		}
 
@@ -67,6 +67,8 @@ Mesh::Mesh(Graphics& gfx, FBXMesh& fbx_mesh) {
 
 	AddBind(std::make_unique<TransformCBuf>(gfx, *this));
 
+	AddBind(std::make_unique<BonesCbuf>(gfx, bones_cbuf, 1u));
+
 	// model deformation transform (per instance, not stored as bind)
 	dx::XMStoreFloat3x3( &mt, dx::XMMatrixIdentity());
 }
@@ -77,9 +79,16 @@ Mesh::~Mesh()
 }
 
 void Mesh::Update(float dt) noexcept {
+
 }
 
 DirectX::XMMATRIX Mesh::GetTransformXM() const noexcept {
 	namespace dx = DirectX;
 	return dx::XMLoadFloat3x3(&mt);
+}
+
+void Mesh::SyncBones(Graphics& gfx) {
+	auto pConstPS = QueryBindable<BonesCbuf>();
+	assert(pConstPS != nullptr);
+	pConstPS->Update(gfx, bones_cbuf);
 }

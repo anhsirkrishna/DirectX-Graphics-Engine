@@ -9,6 +9,7 @@
 #include "Animation.h"
 #include "Line.h"
 #include "Mesh.h"
+#include "Model.h"
 
 class App {
 public:
@@ -26,6 +27,8 @@ private:
 	std::unique_ptr<Line> draw_line;
 	std::unique_ptr<Skeleton> draw_skeleton;
 	std::unique_ptr<Mesh> draw_mesh;
+	std::unique_ptr<Animation> animation;
+	std::unique_ptr<Model> draw_model;
 	float speed_factor = 1.0f;
 	Camera cam;
 

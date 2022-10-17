@@ -228,7 +228,7 @@ bool SkinData::ExtractSkinWeights(FbxPose* p_pose, FbxNode* p_node,  FBXSkeleton
 					continue;
 
 				FbxNode* p_link = p_cluster->GetLink();
-				int bone_indx = skel.GetBoneIndex(p_node);
+				int bone_indx = skel.GetBoneIndex(p_link);
 
 				//Bone does not have a bind pose so the Transform Link Matrix
 				//as the bind pose

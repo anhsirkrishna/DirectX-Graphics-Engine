@@ -20,22 +20,15 @@ public:
 	std::vector<Bone*> children;
 };
 
-class Skeleton {
-public:
-	~Skeleton();
-	void ConvertFromFbx(FBXSkeleton* _skele);
-	void Initialize();
-	std::vector<Bone*> hierarchy;
-};
-
 class KeyFrame {
-	float elapsed_time;
+public:
+	float time;
 	VQS transform;
 };
 
 //A Track is a set of keyframes that are in temporal
 //order from 0 to the animation duration
-struct Tracks {
+struct Track {
 	std::vector<KeyFrame> key_frames;
 };
 
@@ -50,16 +43,24 @@ class Animation {
 public:
 	Animation();
 	~Animation();
+	void CalculateTransform(float animTime, int trackIndex, VQS& animation_transform, TrackData& data);
+	void ConvertFromFbx(FBXAnimation* fbx_animation);
+
 	float duration;
-	std::vector<Tracks> tracks;
-	//void CalculateTransform(float animTime, uint trackIndex, AnimTransform& atx, TrackData& data);
-	void LoadAnimation();
+	std::vector<Track> tracks;
+
 };
 
-class AnimatedModel {
+class Skeleton {
 public:
-	Skeleton* skeleton;
-	std::vector<Animation> animations;
+	~Skeleton();
+	void ConvertFromFbx(FBXSkeleton* _skele);
+	void Initialize();
+	void ProcessAnimationGraph(float time, std::vector<dx::XMMATRIX>& matrix_buffer,
+		Animation& anim, std::vector<TrackData>& track_buffer);
+	void ProcessBindPose(std::vector<dx::XMMATRIX>& buffer);
+
+	std::vector<Bone*> hierarchy;
 };
 
 //Controls the animation for a animated model by tracking time and
@@ -76,7 +77,7 @@ public:
 	Skeleton* skeleton;
 	Animation* active_animation;
 	std::vector<TrackData> animation_track_data;
-	std::vector<dx::XMFLOAT4X4> bone_matrix_buffer;
+	std::vector<dx::XMMATRIX> bone_matrix_buffer;
 	std::vector<Animation*> animations;
 
 	void ClearTrackData();

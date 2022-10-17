@@ -12,6 +12,8 @@ public:
 	
 	void SetV(const dx::XMFLOAT3& _v);
 	void SetQ(const dx::XMFLOAT3& _v);
+	dx::XMMATRIX toMatrix() const;
+	VQS InterpolateTo(const VQS& vqs_n, float t);
 private:
 	dx::XMFLOAT3 v;
 	Quaternion q;

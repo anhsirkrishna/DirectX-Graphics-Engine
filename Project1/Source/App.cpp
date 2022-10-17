@@ -60,8 +60,9 @@ App::App() : window(WindowWidth, WindowHeight, TEXT("Direct3D Engine")) {
 	draw_line = std::make_unique<Line>(window.Gfx(), color);
 
 	fbx_loader.ExtractSceneData();
-	FBXMesh fbx_mesh = *(fbx_loader.meshes[0]);
-	draw_mesh = std::make_unique<Mesh>(window.Gfx(), fbx_mesh);
+	
+	draw_model = std::make_unique<Model>();
+	draw_model->LoadModel(window.Gfx(), &fbx_loader);
 }
 
 int App::Run() {
@@ -84,8 +85,10 @@ void App::Update() {
 		d->Update(window.keyboard.isKeyPressed(VK_SPACE) ? 0.0f : dt);
 		d->Draw(window.Gfx());
 	}
+	//draw_mesh->Draw(window.Gfx());
+	draw_model->Update(dt);
+	draw_model->Draw(window.Gfx());
 	//draw_line->Draw(window.Gfx());
-	draw_mesh->Draw(window.Gfx());
 	//draw_skeleton->Draw(window.Gfx());
 	SpawnSimulationWindow();
 	cam.SpawnCameraControls();

@@ -56,7 +56,7 @@ void FBXAnimation::ExtractAnimationTrack(
 	FBXMatConverter& converter) {
 	printf("Reading KeyFrames For Node '%s'\n", p_node->GetName());
 
-	Track& track = tracks[track_index];
+	FBXTrack& track = tracks[track_index];
 
 	FbxAnimLayer* animation_layer = animation_stack->GetMember<FbxAnimLayer>(0);
 
