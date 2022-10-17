@@ -47,11 +47,8 @@
     <Filter Include="Source\FBX">
       <UniqueIdentifier>{e56c3739-22ae-4f81-a79d-4cecbde21e36}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\FBX\Converter">
+    <Filter Include="Source\FBX\Util">
       <UniqueIdentifier>{4f3f8f54-d65a-478e-9bd3-041dcd6ea0a3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\FBX\Drawables">
-      <UniqueIdentifier>{2e52d0b7-9a80-4901-9b10-b20a2d30d0b4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -137,7 +134,7 @@
       <Filter>Source\FBX</Filter>
     </ClCompile>
     <ClCompile Include="Source\FBXMatConverter.cpp">
-      <Filter>Source\FBX\Converter</Filter>
+      <Filter>Source\FBX\Util</Filter>
     </ClCompile>
     <ClCompile Include="Source\Line.cpp">
       <Filter>Source\Graphics\Drawables</Filter>
@@ -147,6 +144,24 @@
     </ClCompile>
     <ClCompile Include="Source\Quaternion.cpp">
       <Filter>Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\VQS.cpp">
+      <Filter>Source\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FBXMesh.cpp">
+      <Filter>Source\FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FBXUtil.cpp">
+      <Filter>Source\FBX\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mesh.cpp">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Model.cpp">
+      <Filter>Source\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FBXAnimation.cpp">
+      <Filter>Source\FBX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -262,7 +277,7 @@
       <Filter>Source\FBX</Filter>
     </ClInclude>
     <ClInclude Include="Source\FBXMatConverter.h">
-      <Filter>Source\FBX\Converter</Filter>
+      <Filter>Source\FBX\Util</Filter>
     </ClInclude>
     <ClInclude Include="Source\Line.h">
       <Filter>Source\Graphics\Drawables</Filter>
@@ -270,12 +285,36 @@
     <ClInclude Include="Source\Quaternion.h">
       <Filter>Source\Math</Filter>
     </ClInclude>
+    <ClInclude Include="Source\VQS.h">
+      <Filter>Source\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXMesh.h">
+      <Filter>Source\FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXUtil.h">
+      <Filter>Source\FBX\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mesh.h">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Model.h">
+      <Filter>Source\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXAnimation.h">
+      <Filter>Source\FBX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Source\SolidPS.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Source\SolidVS.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\AnimatedVS.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\AnimatedPS.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

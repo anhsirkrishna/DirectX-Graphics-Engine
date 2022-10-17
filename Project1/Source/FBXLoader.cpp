@@ -1,4 +1,9 @@
+#include <vector>
+#include "FBXUtil.h"
+#include "FBXMatConverter.h"
+#include "FBXMesh.h"
 #include "FBXLoader.h"
+#include "FBXAnimation.h"
 
 /* Tab character ("\t") counter */
 int numTabs = 0;
@@ -93,7 +98,15 @@ void PrintRootNode(FbxNode* pNode) {
 	}
 }
 
-FBXLoader::FBXLoader() {
+FBXLoader::FBXLoader() : bind_pose(nullptr) {
+	/*
+	* "Facial & Body Animated Toon Goon - ActorCore" (https://skfb.ly/oyvBs) by Reallusion is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+	*/
+	
+	/*
+	* "Dwarf Warrior" (https://skfb.ly/6VZNo) by Northcliffe is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+	*/
+
 	const char* filename = "Tad.fbx";
 
 	// Initialize the SDK manager. This object handles memory management.
@@ -121,10 +134,95 @@ FBXLoader::FBXLoader() {
 
 	// The file is imported, so get rid of the importer.
 	lImporter->Destroy();
+	
+	bind_pose = p_Scene->GetPose(0);
+	skele.p_bind_pose = bind_pose;
 }
 
 FBXLoader::~FBXLoader() {
+	for (auto& mesh : meshes)
+		delete mesh;
+
+	for (auto& animation : animations)
+		delete animation;
+
 	// Destroy the SDK manager and all the other objects it was handling.
 	fbx_sdk_manager->Destroy();
 }
 
+void FBXLoader::CollectMeshes(FbxNode* pRootNode)
+{
+	for (int i = 0; i < pRootNode->GetChildCount(); i++)
+	{
+		FbxNode* pNode = pRootNode->GetChild(i);
+
+		//If the node invisible it is usually a construction or dummy mesh
+		//either way ignore it
+		if (pNode->GetVisibility())
+		{
+			//The node must be a mesh
+			if (GetNodeAttributeType(pNode) == FbxNodeAttribute::eMesh)
+			{
+				FbxMesh* pMesh = pNode->GetMesh();
+				meshes.push_back(new FBXMesh(pRootNode->GetChild(i)));
+			}
+
+			if (GetNodeAttributeType(pNode) == FbxNodeAttribute::eNull)
+			{
+				CollectMeshes(pNode);
+			}
+		}
+	}
+}
+
+bool FBXLoader::ExtractSceneData()
+{
+	//Determine conversion
+	FBXMatConverter converter(p_Scene);
+
+	FbxNode* root_node = p_Scene->GetRootNode();
+
+	int pose_count = p_Scene->GetPoseCount();//Need a Bind Pose
+
+	printf("Exporting As Skinned Model\n");
+	printf("Using Bind Pose: %s\n", bind_pose->GetName());
+
+	CollectMeshes(p_Scene->GetRootNode());
+
+	if (meshes.size() == 0)
+	{
+		printf("No valid meshes found in scene");
+		return false;
+	}
+
+	printf("Exporting Geometry...\n");
+	for (auto p_mesh : meshes)
+		p_mesh->mesh.ExtractGeometry(p_mesh->p_mesh_node, bind_pose, converter);
+
+	skele.ExtractSkeletonFromScene(root_node);
+
+	for (auto p_mesh : meshes) {
+		if (p_mesh->skin.ExtractSkinWeights(bind_pose, p_mesh->p_mesh_node, skele, converter))
+			p_mesh->mesh_vertex_type = VertexTypeSkin;
+	}
+
+	skele.ExtractBindPose(converter);
+
+	//Extracting animations
+	int animation_stack_count = p_Scene->GetSrcObjectCount<FbxAnimStack>();
+	
+	printf("Extracting animations \n");
+	for (int i = 0; i < animation_stack_count; i++)
+	{
+		FbxAnimStack* anim_stack = p_Scene->GetSrcObject<FbxAnimStack>(i);
+		FbxString stack_name = anim_stack->GetName();
+		if (stack_name.Compare(FBXSDK_TAKENODE_DEFAULT_NAME) == 0)
+			continue;
+
+		FBXAnimation* animation = new FBXAnimation();
+		animation->ExtractAnimationTracksFromStack(p_Scene, skele.bones_nodes, anim_stack, converter);
+		animations.push_back(animation);
+	}
+
+	return true;
+}

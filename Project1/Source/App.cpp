@@ -59,18 +59,9 @@ App::App() : window(WindowWidth, WindowHeight, TEXT("Direct3D Engine")) {
 	DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	draw_line = std::make_unique<Line>(window.Gfx(), color);
 
-
-	FBXSkeleton skele;
-
-	FBXMatConverter converter(fbx_loader.p_Scene);
-	skele.p_bind_pose = fbx_loader.p_Scene->GetPose(0);
-	FbxNode* rootNode = fbx_loader.p_Scene->GetRootNode();
-
-	skele.ExtractSkeletonFromScene(rootNode);
-	skele.ExtractBindPose(converter);
-
-	draw_skeleton = std::make_unique<Skeleton>();
-	draw_skeleton->ConvertFromFbx(window.Gfx(), &skele);
+	fbx_loader.ExtractSceneData();
+	FBXMesh fbx_mesh = *(fbx_loader.meshes[0]);
+	draw_mesh = std::make_unique<Mesh>(window.Gfx(), fbx_mesh);
 }
 
 int App::Run() {
@@ -93,7 +84,8 @@ void App::Update() {
 		d->Update(window.keyboard.isKeyPressed(VK_SPACE) ? 0.0f : dt);
 		d->Draw(window.Gfx());
 	}
-	
+	//draw_line->Draw(window.Gfx());
+	draw_mesh->Draw(window.Gfx());
 	//draw_skeleton->Draw(window.Gfx());
 	SpawnSimulationWindow();
 	cam.SpawnCameraControls();

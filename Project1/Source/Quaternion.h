@@ -11,13 +11,13 @@ public:
 	Quaternion ScalarProduct(const float& c) const;
 	float DotProduct(const Quaternion& b) const;
 	Quaternion Concatenate(const Quaternion& b) const;
-	Quaternion Conjugate();
-	float Magnitude();
+	Quaternion Conjugate() const;
+	float Magnitude() const;
 	void SetIdentity();
-	Quaternion Inverse();
+	Quaternion Inverse() const;
 
-	dx::XMVECTOR Rotate(const dx::XMVECTOR& p);
-	dx::XMMATRIX toMatrix();
+	dx::XMVECTOR Rotate(const dx::XMVECTOR& p) const;
+	dx::XMMATRIX toMatrix() const;
 	static Quaternion fromMatrix(const dx::XMMATRIX& _mat);
 private:
 	float s;

@@ -1,4 +1,3 @@
-#include <fbxsdk.h>
 #include "FBXMatConverter.h"
 
 FBXMatConverter::FBXMatConverter(FbxScene* pScene) {
@@ -30,6 +29,13 @@ FBXMatConverter::FBXMatConverter(FbxScene* pScene) {
 	}
 }
 
+//Convert a matrix in FBX format (right handed,y up) to DirectX format (left handed, y up)
 void FBXMatConverter::ConvertMatrix(FbxAMatrix& sourceMatX) {
 	sourceMatX = ConversionMatrix * sourceMatX * ConversionMatrix;
+}
+
+//Same as convert expect do not apply the second conversion matrix because we want the vector
+//in converted space
+void FBXMatConverter::ConvertMeshMatrix(FbxAMatrix& sourceMatX) {
+	sourceMatX = ConversionMatrix * sourceMatX;
 }

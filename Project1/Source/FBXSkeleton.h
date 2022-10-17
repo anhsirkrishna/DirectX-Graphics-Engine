@@ -25,6 +25,7 @@ public:
 	~FBXSkeleton();
 	void ExtractSkeletonFromScene(FbxNode* p_root_node);
 	void ExtractBindPose(FBXMatConverter& converter);
+	int GetBoneIndex(FbxNode* p_node);
 	FbxPose* p_bind_pose;
 	std::vector<FBXBone*> bones;
 	std::vector<FbxNode*> bones_nodes;

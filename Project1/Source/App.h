@@ -8,6 +8,7 @@
 #include "FBXSkeleton.h"
 #include "Animation.h"
 #include "Line.h"
+#include "Mesh.h"
 
 class App {
 public:
@@ -24,6 +25,7 @@ private:
 	std::vector<class Box*> boxes;
 	std::unique_ptr<Line> draw_line;
 	std::unique_ptr<Skeleton> draw_skeleton;
+	std::unique_ptr<Mesh> draw_mesh;
 	float speed_factor = 1.0f;
 	Camera cam;
 

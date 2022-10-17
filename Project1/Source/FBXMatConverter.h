@@ -7,6 +7,7 @@ class FBXMatConverter
 public:
 	FBXMatConverter(FbxScene* pScene);
 	void ConvertMatrix(FbxAMatrix& sourceMatX);
+	void ConvertMeshMatrix(FbxAMatrix& sourceMatX);
 	FbxAMatrix ConversionMatrix;
 	bool NeedToChangedWinding;
 };

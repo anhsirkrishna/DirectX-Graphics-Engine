@@ -16,7 +16,7 @@ Line::Line(Graphics& gfx, DirectX::XMFLOAT4 color) : mt() {
 		pos = dx::XMFLOAT3(1.0, 1.0, 1.0);
 		vertices.push_back(Vertex{ pos });
 
-		std::vector<unsigned short> indices;
+		std::vector<int> indices;
 		indices.push_back(0);
 		indices.push_back(1);
 
