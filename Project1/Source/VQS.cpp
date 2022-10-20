@@ -61,8 +61,14 @@ void VQS::SetQ(const dx::XMFLOAT3& _v) {
 	q = Quaternion(0, _v);
 }
 
-dx::XMMATRIX VQS::toMatrix() const {	
-	return q.toMatrix() * dx::XMMatrixTranslation(v.x, v.y, v.z);
+dx::XMMATRIX VQS::toMatrix() const {
+	return dx::XMMatrixAffineTransformation(
+		dx::XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f),
+		dx::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
+		q.toVector(),
+		dx::XMVectorSet(v.x, v.y, v.z, 0)
+	);
+	//return  q.toMatrix() * dx::XMMatrixTranslation(v.x, v.y, v.z);
 }
 
 VQS VQS::InterpolateTo(const VQS& vqs_n, float t) {

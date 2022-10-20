@@ -6,7 +6,7 @@ cbuffer CBuf
 
 cbuffer cbBones
 {
-	matrix bone_transforms[60];
+	matrix bone_transforms[96];
 };
 
 struct VSOut

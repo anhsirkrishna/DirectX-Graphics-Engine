@@ -100,6 +100,11 @@ Quaternion Quaternion::Inverse() const {
 	return ret_q;
 }
 
+dx::XMVECTOR Quaternion::toVector() const
+{
+	return dx::XMVectorSet(v.x, v.y, v.z, s);
+}
+
 dx::XMVECTOR Quaternion::Rotate(const dx::XMVECTOR& p) const {
 	Quaternion result;
 	result.s = dx::XMVectorGetW(p);

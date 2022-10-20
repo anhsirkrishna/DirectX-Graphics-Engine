@@ -16,7 +16,7 @@ public:
 
 	struct VSBonesConstant
 	{
-		DirectX::XMMATRIX bones_transform[60];
+		DirectX::XMMATRIX bones_transform[96];
 	} bones_cbuf;
 	using BonesCbuf = VertexConstantBuffer<VSBonesConstant>;
 	void SyncBones(Graphics& gfx);

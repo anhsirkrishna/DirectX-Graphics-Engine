@@ -16,6 +16,7 @@ public:
 	void SetIdentity();
 	Quaternion Inverse() const;
 
+	dx::XMVECTOR toVector() const;
 	dx::XMVECTOR Rotate(const dx::XMVECTOR& p) const;
 	dx::XMMATRIX toMatrix() const;
 	static Quaternion fromMatrix(const dx::XMMATRIX& _mat);

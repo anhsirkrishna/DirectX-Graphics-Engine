@@ -14,6 +14,7 @@ public:
 
 	Mesh* mesh;
 	AnimationController* controller;
+	bool is_bind_pose;
 };
 
 

@@ -60,7 +60,6 @@ void Skeleton::Initialize() {
 
 void Skeleton::ProcessAnimationGraph(float time, std::vector<dx::XMMATRIX>& matrix_buffer,
 									 Animation& anim, std::vector<TrackData>& track_buffer) {
-	dx::XMMATRIX mat = dx::XMMatrixIdentity();
 	for (unsigned int boneIndex = 0; boneIndex < hierarchy.size(); ++boneIndex)
 	{
 		Bone* bone = hierarchy[boneIndex];
