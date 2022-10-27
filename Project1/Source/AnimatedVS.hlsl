@@ -21,12 +21,13 @@ VSOut main(float3 pos : Position, float3 normal : Normal, float2 tc : Texcoord,
 			float4 weights : Weights, uint4 weight_indx : Weightindex)
 {
 	VSOut vso;
-
+	float3 pos_l;
 	if (any(weights)) {
 		matrix m = 0;
 
 		for (uint i = 0; i < 4; i++) {
 			m += bone_transforms[weight_indx[i]] * weights[i];
+			//m += bone_transforms[weight_indx[i]];
 		}
 
 		pos = mul(m, float4(pos, 1.0f));

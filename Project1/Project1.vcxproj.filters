@@ -163,6 +163,12 @@
     <ClCompile Include="Source\FBXAnimation.cpp">
       <Filter>Source\FBX</Filter>
     </ClCompile>
+    <ClCompile Include="Source\LineTree.cpp">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Texture.cpp">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Bindable.h">
@@ -303,6 +309,12 @@
     <ClInclude Include="Source\FBXAnimation.h">
       <Filter>Source\FBX</Filter>
     </ClInclude>
+    <ClInclude Include="Source\LineTree.h">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Texture.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Source\SolidPS.hlsl">
@@ -315,6 +327,12 @@
       <Filter>Source\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Source\AnimatedPS.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="SkeletonVS.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="SkeletonPS.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

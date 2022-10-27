@@ -58,8 +58,13 @@ void FBXSkeleton::ExtractBindPose(FBXMatConverter& converter) {
 		FbxAMatrix localMatrix;
 		if (lNodeIndex == -1)
 		{
-			//Bone does not have a bind pose export identity
-			localMatrix.SetIdentity();
+			//Bone does not have a bind pose. 
+			int parent_index = bones[i]->ParentIndex;
+			int parent_node_index = p_bind_pose->Find(bones[parent_index]->BoneNode);
+			localMatrix = GetPoseMatrix(p_bind_pose, parent_node_index);
+
+			//localMatrix.SetIdentity();
+			//localMatrix = GetGlobalDefaultPosition(bones[i]->BoneNode);
 		}
 		else
 		{

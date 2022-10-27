@@ -12,7 +12,7 @@ public:
 	void Update(float dt) noexcept override;
 	DirectX::XMMATRIX GetTransformXM() const noexcept;
 	// model transform
-	DirectX::XMFLOAT3X3 mt;
+	DirectX::XMFLOAT4X4 mt;
 
 	struct VSBonesConstant
 	{

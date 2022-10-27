@@ -15,10 +15,16 @@ Line::Line(Graphics& gfx, DirectX::XMFLOAT4 color) : mt() {
 		vertices.push_back(Vertex{ pos });
 		pos = dx::XMFLOAT3(1.0, 1.0, 1.0);
 		vertices.push_back(Vertex{ pos });
+		pos = dx::XMFLOAT3(0.0, 0.0, 0.0);
+		vertices.push_back(Vertex{ pos });
+		pos = dx::XMFLOAT3(1.0, 2.0, 3.0);
+		vertices.push_back(Vertex{ pos });
 
 		std::vector<int> indices;
 		indices.push_back(0);
 		indices.push_back(1);
+		indices.push_back(2);
+		indices.push_back(3);
 
 		AddStaticBind(std::make_unique<VertexBuffer>(gfx, vertices));
 

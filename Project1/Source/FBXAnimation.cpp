@@ -97,7 +97,7 @@ void FBXAnimation::ExtractAnimationTrack(
 			localXForm.SetS(FbxVector4(1, 1, 1));
 		}
 
-		track.key_frames[keyIndex].time = current.GetSecondDouble();
+		track.key_frames[keyIndex].time = current;
 		track.key_frames[keyIndex].translation = localXForm.GetT();//Store translation
 		track.key_frames[keyIndex].rotation = localXForm.GetQ();//Store rotation
 		keyIndex++;

@@ -22,7 +22,7 @@ Quaternion Quaternion::ScalarProduct(const float& c) const {
 }
 
 float Quaternion::DotProduct(const Quaternion& b) const {
-	return (s*b.s) + (v.x + b.v.x) + (v.y + b.v.y) + (v.z + b.v.z);
+	return (s*b.s) + (v.x * b.v.x) + (v.y * b.v.y) + (v.z * b.v.z);
 }
 
 Quaternion Quaternion::Concatenate(const Quaternion& b) const {
@@ -151,11 +151,16 @@ Quaternion Quaternion::fromMatrix(const dx::XMMATRIX& _mat) {
 
 //Slerp between two quaternions
 Quaternion Quaternion::InterpolateTo(const Quaternion& q_n, float t) {
+	/*
 	float d_p = DotProduct(q_n);
-	bool flip = false;
+
 	if (d_p < 0)
 	{
 		d_p = -d_p;
+	}
+	else if (d_p == 1)
+	{
+		return Quaternion(s, v);
 	}
 	float alpha = dx::XMScalarACos(d_p);
 	float sin_alpha = dx::XMScalarSin(alpha);
@@ -167,5 +172,43 @@ Quaternion Quaternion::InterpolateTo(const Quaternion& q_n, float t) {
 		((v.x * sin_t_m_alpha) / sin_alpha) + ((q_n.v.x * sin_t_m_alpha) / sin_alpha),
 		((v.y * sin_t_m_alpha) / sin_alpha) + ((q_n.v.y * sin_t_m_alpha) / sin_alpha),
 		((v.z * sin_t_m_alpha) / sin_alpha) + ((q_n.v.z * sin_t_m_alpha) / sin_alpha));
-	return Quaternion();
+
+
+	return Quaternion(t_s, t_v);
+	*/
+	float slerp_epsilon = 0.00001f;
+	float d_p = DotProduct(q_n);
+
+	bool flip;
+	float alpha, beta;
+
+	if (flip = (d_p < 0))
+		d_p = -d_p;
+
+	if ((1.0f - d_p) > slerp_epsilon)
+	{
+		float omega = dx::XMScalarACos(d_p);
+		float sin_omega = dx::XMScalarSin(omega);
+		alpha = (float)(dx::XMScalarSin((1.0 - t) * omega) / sin_omega);
+		beta = (float)(dx::XMScalarSin(t * omega) / sin_omega);
+	}
+	else
+	{
+		alpha = (float)(1.0 - t);
+		beta = (float)t;
+	}
+
+	if (flip) beta = -beta;
+
+	Quaternion ret_qt;
+
+	ret_qt.s = (float)(alpha * s) + (beta * q_n.s);
+	dx::XMFLOAT3 t_v(
+		(alpha * v.x) + (beta * q_n.v.x),
+		(alpha * v.y) + (beta * q_n.v.y),
+		(alpha * v.z) + (beta * q_n.v.z)
+	);
+	ret_qt.v = t_v;
+
+	return ret_qt;
 }

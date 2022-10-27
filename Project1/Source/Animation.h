@@ -4,6 +4,8 @@
 #include <DirectXMath.h>
 #include "Line.h"
 #include "VQS.h"
+#include "FBXSkeleton.h"
+#include "FBXAnimation.h"
 
 class Bone {
 public:
@@ -22,7 +24,7 @@ public:
 
 class KeyFrame {
 public:
-	float time;
+	double time;
 	VQS transform;
 };
 

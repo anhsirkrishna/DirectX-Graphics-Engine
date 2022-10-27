@@ -1,7 +1,8 @@
 #pragma once
-#include "Mesh.h"
 #include "Animation.h"
+#include "Mesh.h"
 #include "FBXLoader.h"
+#include "LineTree.h"
 
 class Model
 {
@@ -12,9 +13,15 @@ public:
 	void Draw(Graphics& gfx);
 	void Update(float dt) noexcept;
 
+	void SpawnModelControls() noexcept;
+
 	Mesh* mesh;
 	AnimationController* controller;
+	LineTree* skeleton_drawable;
+
 	bool is_bind_pose;
+	bool draw_mesh;
+	bool draw_skeleton;
 };
 
 

@@ -54,7 +54,7 @@ Mesh::Mesh(Graphics& gfx, FBXMesh& fbx_mesh) {
 			{ "Normal",     0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "Texcoord",   0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "Weights",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "Weightindex",0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+			{ "Weightindex",0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 		};
 		AddStaticBind(std::make_unique<InputLayout>(gfx, ied, pvsbc));
 
@@ -70,7 +70,7 @@ Mesh::Mesh(Graphics& gfx, FBXMesh& fbx_mesh) {
 	AddBind(std::make_unique<BonesCbuf>(gfx, bones_cbuf, 1u));
 
 	// model deformation transform (per instance, not stored as bind)
-	dx::XMStoreFloat3x3( &mt, dx::XMMatrixIdentity());
+	dx::XMStoreFloat4x4( &mt, dx::XMMatrixTranslation(0.0f, -2.5f, 0.0f));
 }
 
 
@@ -84,7 +84,7 @@ void Mesh::Update(float dt) noexcept {
 
 DirectX::XMMATRIX Mesh::GetTransformXM() const noexcept {
 	namespace dx = DirectX;
-	return dx::XMLoadFloat3x3(&mt);
+	return dx::XMLoadFloat4x4(&mt);
 }
 
 void Mesh::SyncBones(Graphics& gfx) {

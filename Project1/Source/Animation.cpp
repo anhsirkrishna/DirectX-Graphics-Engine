@@ -1,5 +1,3 @@
-#include "FBXSkeleton.h"
-#include "FBXAnimation.h"
 #include "Animation.h"
 
 Skeleton::~Skeleton()
@@ -11,9 +9,9 @@ Skeleton::~Skeleton()
 
 void Skeleton::ConvertFromFbx(FBXSkeleton* _skele) {
 	dx::XMFLOAT3 _translation; 
-	dx::XMFLOAT3 _rotation;
+	dx::XMFLOAT4 _rotation;
 	dx::XMFLOAT3 _inv_translation;
-	dx::XMFLOAT3 _inv_rotation;
+	dx::XMFLOAT4 _inv_rotation;
 	VQS _bind_transform, _inv_bind_transform;
 
 	for (auto& bone : _skele->bones) {
@@ -24,6 +22,7 @@ void Skeleton::ConvertFromFbx(FBXSkeleton* _skele) {
 		_rotation.x = bone->BindRot.GetAt(0);
 		_rotation.y = bone->BindRot.GetAt(1);
 		_rotation.z = bone->BindRot.GetAt(2);
+		_rotation.w = bone->BindRot.GetAt(3);
 		
 		_bind_transform.SetV(_translation);
 		_bind_transform.SetQ(_rotation);
@@ -35,6 +34,7 @@ void Skeleton::ConvertFromFbx(FBXSkeleton* _skele) {
 		_inv_rotation.x = bone->BoneSpaceRot.GetAt(0);
 		_inv_rotation.y = bone->BoneSpaceRot.GetAt(1);
 		_inv_rotation.z = bone->BoneSpaceRot.GetAt(2);
+		_inv_rotation.w = bone->BoneSpaceRot.GetAt(3);
 
 		_inv_bind_transform.SetV(_inv_translation);
 		_inv_bind_transform.SetQ(_inv_rotation);
@@ -128,6 +128,7 @@ void AnimationController::SetSkel(Skeleton* skel) {
 	skeleton = skel;
 	bone_matrix_buffer.resize(skeleton->hierarchy.size());
 	animation_track_data.resize(skeleton->hierarchy.size());
+	ClearTrackData();
 }
 
 void AnimationController::AddAnimation(Animation* anim) {
@@ -166,12 +167,12 @@ void Animation::CalculateTransform(float animTime, int trackIndex, VQS& animatio
 		KeyFrame& key_1 = curr_path.key_frames[curr_key + 1];
 
 		float t1 = key_0.time;
-		float t2 = key_0.time;
+		float t2 = key_1.time;
 
 		//Normalize t to the range 0..1
 		float normalized_t = (animTime - t1) / (t2 - t1);
-		
 		animation_transform = key_0.transform.InterpolateTo(key_1.transform, normalized_t);
+		VQS temp_transform = key_0.transform.InterpolateTo(key_1.transform, normalized_t);
 	}
 
 	//Remember the last keyframe
@@ -180,17 +181,21 @@ void Animation::CalculateTransform(float animTime, int trackIndex, VQS& animatio
 
 void Animation::ConvertFromFbx(FBXAnimation* fbx_animation) {
 	duration = fbx_animation->duration.GetSecondDouble();
-	Track new_track;
 	KeyFrame new_key_frame;
+	int frame_count = 0;
 	for (auto& fbx_track : fbx_animation->tracks) {
+		Track new_track;
 		for (auto& fbx_key_frame : fbx_track.key_frames) {
 			new_key_frame.time = fbx_key_frame.time.GetSecondDouble();
+			if (frame_count == 209)
+				double test_time = fbx_key_frame.time.GetSecondDouble();
 			new_key_frame.transform = VQS(
 				dx::XMFLOAT3(fbx_key_frame.translation[0], fbx_key_frame.translation[1], fbx_key_frame.translation[2]),
-				Quaternion(fbx_key_frame.rotation[4], dx::XMFLOAT3(fbx_key_frame.rotation[0], fbx_key_frame.rotation[1], fbx_key_frame.rotation[2])),
+				Quaternion(fbx_key_frame.rotation[3], dx::XMFLOAT3(fbx_key_frame.rotation[0], fbx_key_frame.rotation[1], fbx_key_frame.rotation[2])),
 				1.0f
 			);
 			new_track.key_frames.push_back(new_key_frame);
+			frame_count++;
 		}
 		tracks.push_back(new_track);
 	}

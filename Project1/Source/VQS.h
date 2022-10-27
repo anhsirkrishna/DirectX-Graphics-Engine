@@ -12,6 +12,7 @@ public:
 	
 	void SetV(const dx::XMFLOAT3& _v);
 	void SetQ(const dx::XMFLOAT3& _v);
+	void SetQ(const dx::XMFLOAT4& _v);
 	dx::XMMATRIX toMatrix() const;
 	VQS InterpolateTo(const VQS& vqs_n, float t);
 private:
