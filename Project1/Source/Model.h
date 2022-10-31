@@ -12,6 +12,7 @@ public:
 	void LoadModel(Graphics& gfx, FBXLoader* fbx_loader);
 	void Draw(Graphics& gfx);
 	void Update(float dt) noexcept;
+	void Reset();
 
 	void SpawnModelControls() noexcept;
 
@@ -22,6 +23,8 @@ public:
 	bool is_bind_pose;
 	bool draw_mesh;
 	bool draw_skeleton;
+
+	dx::XMFLOAT3 position;
 };
 
 

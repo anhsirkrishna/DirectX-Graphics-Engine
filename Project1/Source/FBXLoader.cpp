@@ -107,7 +107,7 @@ FBXLoader::FBXLoader() : bind_pose(nullptr) {
 	* "Dwarf Warrior" (https://skfb.ly/6VZNo) by Northcliffe is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 	*/
 
-	const char* filename = "Tad.fbx";
+	const char* filename = "BaseMesh_Anim.fbx";
 
 	// Initialize the SDK manager. This object handles memory management.
 	fbx_sdk_manager = FbxManager::Create();

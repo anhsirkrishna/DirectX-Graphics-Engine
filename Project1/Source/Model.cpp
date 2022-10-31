@@ -45,11 +45,20 @@ void Model::Draw(Graphics& gfx) {
 
 
 void Model::Update(float dt) noexcept {
+	
+	skeleton_drawable->SetPosition(position);
+	mesh->SetPosition(position);
+	skeleton_drawable->Update(dt);
+	mesh->Update(dt);
 	controller->Update(dt);
 	if (is_bind_pose)
 		controller->ProcessBindPose();
 	else
 		controller->Process();
+}
+
+void Model::Reset() {
+	position = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
 }
 
 void Model::SpawnModelControls() noexcept {
@@ -59,6 +68,14 @@ void Model::SpawnModelControls() noexcept {
 		ImGui::Checkbox("Display Mesh", &draw_mesh);
 		ImGui::Checkbox("Display Skeleton", &draw_skeleton);
 		ImGui::Checkbox("Bind pose", &is_bind_pose);
+		ImGui::Text("Position");
+		ImGui::SliderFloat("X", &position.x, -1000.0f, 1000.0f, "%.1f");
+		ImGui::SliderFloat("Y", &position.y, -1000.0f, 1000.0f, "%.1f");
+		ImGui::SliderFloat("Z", &position.z, -1000.0f, 1000.0f, "%.1f");
+		if (ImGui::Button("Reset"))
+		{
+			Reset();
+		}
 	}
 	ImGui::End();
 }

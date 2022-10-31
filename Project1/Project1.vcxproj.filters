@@ -169,6 +169,15 @@
     <ClCompile Include="Source\Texture.cpp">
       <Filter>Source\Graphics\Bindables</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Path.cpp">
+      <Filter>Source\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Curve.cpp">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DynamicVertexBuffer.cpp">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Bindable.h">
@@ -315,6 +324,15 @@
     <ClInclude Include="Source\Texture.h">
       <Filter>Source\Graphics\Bindables</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Path.h">
+      <Filter>Source\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Curve.h">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DynamicVertexBuffer.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Source\SolidPS.hlsl">
@@ -333,6 +351,12 @@
       <Filter>Source\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="SkeletonPS.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\CurvePS.hlsl">
+      <Filter>Source\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\CurveVS.hlsl">
       <Filter>Source\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

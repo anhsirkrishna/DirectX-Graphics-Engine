@@ -6,6 +6,7 @@
 #include "Topology.h"
 #include "TransformCBuf.h"
 #include <memory>
+#include "imgui/imgui.h"
 
 Mesh::Mesh(Graphics& gfx, FBXMesh& fbx_mesh) {
 	namespace dx = DirectX;
@@ -79,7 +80,9 @@ Mesh::~Mesh()
 }
 
 void Mesh::Update(float dt) noexcept {
-
+	namespace dx = DirectX;
+	dx::XMStoreFloat4x4(&mt, 
+		dx::XMMatrixTranslation(position.x, position.y, position.z));
 }
 
 DirectX::XMMATRIX Mesh::GetTransformXM() const noexcept {
@@ -91,4 +94,12 @@ void Mesh::SyncBones(Graphics& gfx) {
 	auto pConstPS = QueryBindable<BonesCbuf>();
 	assert(pConstPS != nullptr);
 	pConstPS->Update(gfx, bones_cbuf);
+}
+
+void Mesh::Reset() {
+	position = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+}
+
+void Mesh::SetPosition(DirectX::XMFLOAT3 _pos) {
+	position = _pos;
 }

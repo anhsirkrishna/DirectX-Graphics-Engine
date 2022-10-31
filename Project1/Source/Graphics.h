@@ -20,6 +20,7 @@ public:
 	void ClearBuffer(float red, float green, float blue) noexcept;
 	void BeginFrame() noexcept;
 	void DrawIndexed(UINT count);
+	void DrawAuto();
 	void SetProjection(DirectX::FXMMATRIX proj) noexcept;
 	DirectX::XMMATRIX GetProjection() const noexcept;
 	void SetCamera(DirectX::FXMMATRIX _camera) noexcept;

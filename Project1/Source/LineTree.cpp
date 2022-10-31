@@ -66,8 +66,9 @@ LineTree::LineTree(Graphics& gfx, const Skeleton& skeleton) {
 
 	AddBind(std::make_unique<BonesCbuf>(gfx, bones_cbuf, 1u));
 
+	SetPosition(dx::XMFLOAT3(0.0f, -2.5f, 0.0f));
 	// model deformation transform (per instance, not stored as bind)
-	dx::XMStoreFloat4x4(&mt, dx::XMMatrixTranslation(0.0f, -2.5f, 0.0f));
+	SetModelTransform();
 }
 
 DirectX::XMMATRIX LineTree::GetTransformXM() const noexcept {
@@ -76,6 +77,7 @@ DirectX::XMMATRIX LineTree::GetTransformXM() const noexcept {
 }
 
 void LineTree::Update(float dt) noexcept {
+	SetModelTransform();
 }
 
 void LineTree::SetBoneTransform(unsigned int index, const DirectX::XMMATRIX& transform) {
@@ -86,4 +88,13 @@ void LineTree::SyncBones(Graphics& gfx) {
 	auto pConstPS = QueryBindable<BonesCbuf>();
 	assert(pConstPS != nullptr);
 	pConstPS->Update(gfx, bones_cbuf);
+}
+
+void LineTree::SetPosition(DirectX::XMFLOAT3 _pos) {
+	position = _pos;
+}
+
+void LineTree::SetModelTransform() {
+	dx::XMStoreFloat4x4(&mt, 
+		dx::XMMatrixTranslation(position.x, position.y, position.z));
 }

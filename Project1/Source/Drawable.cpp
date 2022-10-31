@@ -15,7 +15,11 @@ void Drawable::Draw(Graphics& gfx) const {
 	{
 		b->Bind(gfx);
 	}
-	gfx.DrawIndexed(pIndexBuffer->GetCount());
+	
+	if (pIndexBuffer == nullptr)
+		gfx.DrawAuto();
+	else
+		gfx.DrawIndexed(pIndexBuffer->GetCount());
 }
 
 /*

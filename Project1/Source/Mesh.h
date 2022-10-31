@@ -11,8 +11,14 @@ public:
 
 	void Update(float dt) noexcept override;
 	DirectX::XMMATRIX GetTransformXM() const noexcept;
+	void Reset();
+
+	void SetPosition(DirectX::XMFLOAT3 _pos);
+
 	// model transform
 	DirectX::XMFLOAT4X4 mt;
+
+	DirectX::XMFLOAT3 position;
 
 	struct VSBonesConstant
 	{

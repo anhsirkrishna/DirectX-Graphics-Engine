@@ -68,7 +68,7 @@ void VQS::SetQ(const dx::XMFLOAT4& _v) {
 
 dx::XMMATRIX VQS::toMatrix() const {
 	return dx::XMMatrixAffineTransformation(
-		dx::XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f),
+		dx::XMVectorSet(s, s, s, 1.0f),
 		dx::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),
 		q.toVector(),
 		dx::XMVectorSet(v.x, v.y, v.z, 1.0f)

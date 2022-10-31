@@ -7,8 +7,11 @@
 #include <iterator>
 #include "imgui/imgui.h"
 
-int WindowHeight = 600;
-int WindowWidth = 800;
+int WindowHeight = 720;
+int WindowWidth = 1280;
+
+//int WindowHeight = 600;
+//int WindowWidth = 800;
 
 namespace dx = DirectX;
 
@@ -55,7 +58,7 @@ App::App() : window(WindowWidth, WindowHeight, TEXT("Direct3D Engine")) {
 		}
 	}
 
-	window.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 300.0f));
+	window.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 1000.0f));
 	DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	draw_line = std::make_unique<Line>(window.Gfx(), color);
 
@@ -63,6 +66,18 @@ App::App() : window(WindowWidth, WindowHeight, TEXT("Direct3D Engine")) {
 	
 	draw_model = std::make_unique<Model>();
 	draw_model->LoadModel(window.Gfx(), &fbx_loader);
+
+	animation_path = std::make_unique<Path>();
+	animation_path->AddControlPoint(dx::XMFLOAT3(-40.0f, 0.0f, 40.0f));
+	animation_path->AddControlPoint(dx::XMFLOAT3(-40.0f, 0.0f,  0.0f));
+	animation_path->AddControlPoint(dx::XMFLOAT3(-40.0f, 0.0f, -40.0f));
+	animation_path->AddControlPoint(dx::XMFLOAT3(0.0f, 0.0f, -40.0f));
+	animation_path->AddControlPoint(dx::XMFLOAT3(40.0f, 0.0f, -40.0f));
+	animation_path->AddControlPoint(dx::XMFLOAT3(40.0f, 0.0f, 0.0f));
+	animation_path->AddControlPoint(dx::XMFLOAT3(40.0f, 0.0f, 40.0f));
+	animation_path->AddControlPoint(dx::XMFLOAT3(0.0f, 0.0f, 40.0f));
+	draw_path = std::make_unique<Curve>(window.Gfx(), animation_path->GeneratePath());
+
 }
 
 int App::Run() {
@@ -85,11 +100,21 @@ void App::Update() {
 		d->Update(window.keyboard.isKeyPressed(VK_SPACE) ? 0.0f : dt);
 		d->Draw(window.Gfx());
 	}
-	//draw_mesh->Draw(window.Gfx());
+	
+	dx::XMVECTOR model_pos = animation_path->GetPosition(space_curve_u);
+	draw_model->position.x = dx::XMVectorGetX(model_pos);
+	draw_model->position.y = dx::XMVectorGetY(model_pos);
+	draw_model->position.z = dx::XMVectorGetZ(model_pos);
+
 	draw_model->Update(dt);
 	draw_model->Draw(window.Gfx());
-	//draw_line->Draw(window.Gfx());
-	//draw_skeleton->Draw(window.Gfx());
+
+	draw_path->Update(dt);
+	draw_path->Draw(window.Gfx());
+
+	animation_path->ShowPathControls();
+
+	SpawnSpaceCurveWindow();
 	SpawnSimulationWindow();
 	cam.SpawnCameraControls();
 	window.Gfx().SwapBuffer();
@@ -100,6 +125,7 @@ void App::SpawnSimulationWindow() noexcept
 {
 	if (ImGui::Begin("Simulation Speed"))
 	{
+		ImGui::SliderFloat("Curve U", &space_curve_u, 0.0f, 1.0f);
 		ImGui::SliderFloat("Speed Factor", &speed_factor, 0.0f, 6.0f, "%.4f", 3.2f);
 		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("Status: %s", window.keyboard.isKeyPressed(VK_SPACE) ? "PAUSED" : "RUNNING (hold spacebar to pause)");
@@ -108,6 +134,15 @@ void App::SpawnSimulationWindow() noexcept
 
 		if (ImGui::Button("Fill mode"))
 			window.Gfx().SetFillMode();
+	}
+	ImGui::End();
+}
+
+void App::SpawnSpaceCurveWindow() noexcept
+{
+	if (ImGui::Begin("Space Curve"))
+	{
+		ImGui::SliderFloat("Curve U", &space_curve_u, 0.0f, 1.0f);
 	}
 	ImGui::End();
 }
