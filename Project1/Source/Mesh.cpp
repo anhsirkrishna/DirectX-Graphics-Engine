@@ -71,7 +71,8 @@ Mesh::Mesh(Graphics& gfx, FBXMesh& fbx_mesh) {
 	AddBind(std::make_unique<BonesCbuf>(gfx, bones_cbuf, 1u));
 
 	// model deformation transform (per instance, not stored as bind)
-	dx::XMStoreFloat4x4( &mt, dx::XMMatrixTranslation(0.0f, -2.5f, 0.0f));
+	mt = dx::XMMatrixTranslation(0.0f, -2.5f, 0.0f);
+	rotation = dx::XMMatrixIdentity();
 }
 
 
@@ -81,13 +82,12 @@ Mesh::~Mesh()
 
 void Mesh::Update(float dt) noexcept {
 	namespace dx = DirectX;
-	dx::XMStoreFloat4x4(&mt, 
+	mt = dx::XMMatrixMultiply(rotation,
 		dx::XMMatrixTranslation(position.x, position.y, position.z));
 }
 
 DirectX::XMMATRIX Mesh::GetTransformXM() const noexcept {
-	namespace dx = DirectX;
-	return dx::XMLoadFloat4x4(&mt);
+	return mt;
 }
 
 void Mesh::SyncBones(Graphics& gfx) {
@@ -102,4 +102,8 @@ void Mesh::Reset() {
 
 void Mesh::SetPosition(DirectX::XMFLOAT3 _pos) {
 	position = _pos;
+}
+
+void Mesh::SetRotation(const DirectX::XMMATRIX& _rot) {
+	rotation = _rot;
 }

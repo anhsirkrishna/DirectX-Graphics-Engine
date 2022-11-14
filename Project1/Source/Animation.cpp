@@ -1,4 +1,7 @@
 #include "Animation.h"
+#include "imgui/imgui.h"
+#include <string>
+
 
 Skeleton::~Skeleton()
 {
@@ -72,6 +75,23 @@ void Skeleton::ProcessAnimationGraph(float time, std::vector<dx::XMMATRIX>& matr
 	}
 }
 
+bool Skeleton::ProcessBlendAnimationGraph(float time, std::vector<dx::XMMATRIX>& matrix_buffer,
+	Animation& anim_prev, Animation& anim_next, std::vector<TrackData>& track_buffer, float normalized_velo) {
+	bool blend_completed = true;
+	for (unsigned int boneIndex = 0; boneIndex < hierarchy.size(); ++boneIndex)
+	{
+		Bone* bone = hierarchy[boneIndex];
+		VQS animation_transform;
+		blend_completed &= anim_prev.CalculateBlendTransform(time, boneIndex, anim_next,
+			animation_transform, track_buffer[boneIndex], normalized_velo);
+		dx::XMMATRIX parent_transform = bone->parent_indx != -1 ? matrix_buffer[bone->parent_indx] : dx::XMMatrixIdentity();
+		dx::XMMATRIX local_transform = animation_transform.toMatrix();
+		dx::XMMATRIX modelTransform = local_transform * parent_transform;
+		matrix_buffer[boneIndex] = modelTransform;
+	}
+	return blend_completed;
+}
+
 void Skeleton::ProcessBindPose(std::vector<dx::XMMATRIX>& buffer) {
 	for (unsigned int i = 0; i < hierarchy.size(); ++i) {
 		buffer[i] = hierarchy[i]->bind_transform.toMatrix();
@@ -92,21 +112,44 @@ AnimationController::AnimationController() :
 }
 
 AnimationController::~AnimationController() {
-	delete skeleton;
-	
-	for (auto& animation : animations)
+	for (auto& animation : animations) {
 		delete animation;
+	}
 }
 
-void AnimationController::Update(float dt)
-{
+void AnimationController::Update(float dt) {
+	animation_path->Update(dt);
+	float curr_velo = animation_path->GetCurrentVelocity();
+	animation_speed = curr_velo / active_animation->pace;
+	if (curr_velo < 50) {
+		//Idle animation
+		SwitchAnimation(0);
+	}
+	else if (curr_velo > animation_path->constant_velocity * (2.0f/3)) {
+		//Run animation
+		SwitchAnimation(1);
+	}
+	else {
+		//Walk animation
+		SwitchAnimation(2);
+	}
+
 	animation_time += dt * animation_speed;
 	//Just loop forever
 	if (animation_time > active_animation->duration)
 	{
 		animation_time = 0.0f;
 		ClearTrackData();
+
+		//End any blending that's happening
+		if (animation_blending) {
+			active_animation = next_animation;
+			next_animation = nullptr;
+			animation_blending = false;
+		}
 	}
+	ShowPathControls();
+	ShowAnimationControls();
 }
 
 void AnimationController::ClearTrackData() {
@@ -117,7 +160,26 @@ void AnimationController::ClearTrackData() {
 }
 
 void AnimationController::Process() {
-	skeleton->ProcessAnimationGraph(animation_time, bone_matrix_buffer, *active_animation, animation_track_data);
+	//Check if we are switching between two animations
+	if (animation_blending && animation_blending_enabled) {
+		float noramlized_velo = animation_path->GetCurrentVelocity()/animation_path->constant_velocity;
+		//Blend between the two if we are
+		bool blend_complete = 
+			skeleton->ProcessBlendAnimationGraph(animation_time, bone_matrix_buffer, 
+				*active_animation, *next_animation, animation_track_data, noramlized_velo);
+		//Check if blending is complete
+		if (blend_complete) {
+			animation_blending = false;
+			active_animation = next_animation;
+			next_animation = nullptr;
+		}
+
+	}
+	else {
+		skeleton->ProcessAnimationGraph(animation_time, bone_matrix_buffer, 
+			*active_animation, animation_track_data);
+	}
+	
 }
 
 void AnimationController::ProcessBindPose() {
@@ -125,7 +187,7 @@ void AnimationController::ProcessBindPose() {
 }
 
 void AnimationController::SetSkel(Skeleton* skel) {
-	skeleton = skel;
+	skeleton.reset(skel);
 	bone_matrix_buffer.resize(skeleton->hierarchy.size());
 	animation_track_data.resize(skeleton->hierarchy.size());
 	ClearTrackData();
@@ -136,7 +198,80 @@ void AnimationController::AddAnimation(Animation* anim) {
 	animations.push_back(anim);
 }
 
-Animation::Animation() : duration(0.0f) {
+void AnimationController::SetAnimationPath(Path* path) {
+	animation_path.reset(path);
+	//Idle animation pace
+	animations[1]->pace = animation_path->constant_velocity;
+
+	//Walk animation pace
+	animations[2]->pace = 0.5f * animation_path->constant_velocity;
+
+	//Run animation pace
+	animations[1]->pace = animation_path->constant_velocity;
+
+	//Walk animation pace
+	animations[2]->pace = 0.5f * animation_path->constant_velocity;
+
+	animation_run_threshold = animation_path->constant_velocity * (2.0f / 3);
+}
+
+void AnimationController::SetActiveAnimation(unsigned int animation_index) {
+	active_animation = animations[animation_index];
+	animation_time = 0.0f;
+	ClearTrackData();
+}
+
+void AnimationController::SwitchAnimation(unsigned int animation_index) {
+	if (active_animation != animations[animation_index]) {
+		next_animation = animations[animation_index];
+		animation_blending = true;
+	}
+}
+
+void AnimationController::ShowPathControls() {
+	if (ImGui::Begin("Animtion Path"))
+	{
+		float curr_time = animation_path->GetCurrentPathTime();
+		float curr_distance = animation_path->GetDistanceFromTime(curr_time);
+		ImGui::Text("Distance : %f", curr_distance);
+		float curr_u = animation_path->GetU(curr_distance);
+		ImGui::Text("Inverse Distance : %f", curr_u);
+		float u_distance = animation_path->GetDistance(curr_u);
+		ImGui::Text("Distance from u : %f", u_distance);
+		float velocity = animation_path->GetVelocity(curr_time);
+		ImGui::Text("Velocity : %f", velocity);
+		ImGui::Text("curr_time : %f", curr_time);
+		ImGui::Text("Normalized T : %f", animation_path->GetNormalizedT(curr_time));
+		ImGui::Text("Distance : %f", animation_path->GetDistanceFromTime(curr_time));
+
+		ImGui::SliderFloat("Path velocity", &animation_path->constant_velocity, 500, 1200.0f, "%.4f");
+		if (ImGui::Button("Recalculate velo functions") ) {
+			animation_path->GenerateDefaultVelocityFunction();
+		}
+
+		ImGui::SliderFloat("Look ahead time", &animation_path->constant_look_ahead_time, 0.0f, 12.0f, "%.4f");
+	}
+	ImGui::End();
+}
+
+void AnimationController::ShowAnimationControls() {
+	if (ImGui::Begin("Animation Controller"))
+	{
+		ImGui::Checkbox("Enable animation blending", &animation_blending_enabled);
+		if (ImGui::BeginMenu("Animation Pace")) {
+			for (unsigned int i = 0; i < animations.size(); i++) {
+				std::string str = "Animation " + std::to_string(i);
+				ImGui::SliderFloat(str.c_str(), &animations[i]->pace, 0, 1500.0f, "%.4f");
+			}
+			ImGui::EndMenu();
+		}
+		ImGui::SliderFloat("Run Velocity threshold", &animation_run_threshold, 
+						   0.0f, animation_path->constant_velocity, "%.4f");
+	}
+	ImGui::End();
+}
+
+Animation::Animation() : duration(0.0f), pace(0.0f) {
 }
 
 Animation::~Animation() {
@@ -172,11 +307,77 @@ void Animation::CalculateTransform(float animTime, int trackIndex, VQS& animatio
 		//Normalize t to the range 0..1
 		float normalized_t = (animTime - t1) / (t2 - t1);
 		animation_transform = key_0.transform.InterpolateTo(key_1.transform, normalized_t);
-		VQS temp_transform = key_0.transform.InterpolateTo(key_1.transform, normalized_t);
 	}
 
 	//Remember the last keyframe
 	data.last_key = curr_key;
+}
+
+bool Animation::CalculateBlendTransform(float animTime, int trackIndex, 
+										Animation& next_animation, VQS& animation_transform, 
+										TrackData& data, float normalized_velo) {
+	int curr_key = data.last_key;
+
+	//Track for current animation
+	Track& curr_path = tracks[trackIndex];
+
+	//Track for the next animation to blend into
+	Track& next_anim_curr_path = next_animation.tracks[trackIndex];
+
+	if (curr_key >= next_anim_curr_path.key_frames.size())
+		curr_key = 0;
+
+	//Search Forward in the keyframes for the interval
+	while (curr_key != next_anim_curr_path.key_frames.size() - 1 &&
+		next_anim_curr_path.key_frames[curr_key + 1].time < animTime)
+		++curr_key;
+
+	//Search Backward in the keyframes for the interval
+	while (curr_key != 0 && next_anim_curr_path.key_frames[curr_key].time > animTime)
+		--curr_key;
+
+	//Flag to check if the blending is done between two animations
+	bool blend_completed = false;
+	if (curr_key == next_anim_curr_path.key_frames.size() - 1)
+	{
+		//Clamp animation to the last frame of the next animation
+		animation_transform = next_anim_curr_path.key_frames[curr_key].transform;
+		blend_completed = true;
+	}
+	else 
+	{
+		//Blend between two different animation key frames
+		//Interpolate between the two frames
+		
+		//Initialize key_prev_0 in case curr_key goes beyond that path
+		KeyFrame& key_prev_0 = curr_path.key_frames.back();
+		KeyFrame& key_prev_1 = curr_path.key_frames.back();
+		if (curr_key < curr_path.key_frames.size() - 1) {
+			key_prev_0 = curr_path.key_frames[curr_key];
+			key_prev_1 = curr_path.key_frames[curr_key + 1];
+		}
+		else {
+			blend_completed = true;
+		}
+		
+		KeyFrame& key_next_0 = next_anim_curr_path.key_frames[curr_key];
+		KeyFrame& key_next_1 = next_anim_curr_path.key_frames[curr_key + 1];
+
+		float t1 = key_next_0.time;
+		float t2 = key_next_1.time;
+		//Normalize t to the range 0..1
+		float normalized_t = (animTime - t1) / (t2 - t1);
+
+		VQS prev_transform = key_prev_0.transform.InterpolateTo(key_prev_1.transform, normalized_t);
+
+		VQS next_transform = key_next_0.transform.InterpolateTo(key_next_1.transform, normalized_t);
+
+		animation_transform = prev_transform.InterpolateTo(next_transform, normalized_velo);
+	}
+
+	//Remember the last keyframe
+	data.last_key = curr_key;
+	return blend_completed;
 }
 
 void Animation::ConvertFromFbx(FBXAnimation* fbx_animation) {

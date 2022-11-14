@@ -25,6 +25,9 @@ public:
 	bool draw_skeleton;
 
 	dx::XMFLOAT3 position;
+	dx::XMFLOAT3 pitch;
+	dx::XMFLOAT3 yaw;
+	dx::XMFLOAT3 roll;
 };
 
 

@@ -14,11 +14,13 @@ public:
 	void Reset();
 
 	void SetPosition(DirectX::XMFLOAT3 _pos);
+	void SetRotation(const DirectX::XMMATRIX& _rot);
 
 	// model transform
-	DirectX::XMFLOAT4X4 mt;
+	DirectX::XMMATRIX mt;
 
 	DirectX::XMFLOAT3 position;
+	DirectX::XMMATRIX rotation;
 
 	struct VSBonesConstant
 	{

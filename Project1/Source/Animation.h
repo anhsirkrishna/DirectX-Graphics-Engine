@@ -6,6 +6,7 @@
 #include "VQS.h"
 #include "FBXSkeleton.h"
 #include "FBXAnimation.h"
+#include "Path.h"
 
 class Bone {
 public:
@@ -45,12 +46,23 @@ class Animation {
 public:
 	Animation();
 	~Animation();
+	
+	//Calculate the transform for the skeleton for a given animation_time and bone_index
 	void CalculateTransform(float animTime, int trackIndex, VQS& animation_transform, TrackData& data);
+	
+	/*
+	* Calculate the transform by blending between two different animations
+	* Returns: bool - True if the blending has finished
+	*/
+	bool CalculateBlendTransform(float animTime, int trackIndex, Animation& next_animation,
+								 VQS& animation_transform, TrackData& data,
+								 float normalized_velo);
+	
 	void ConvertFromFbx(FBXAnimation* fbx_animation);
 
 	float duration;
 	std::vector<Track> tracks;
-
+	float pace;
 };
 
 class Skeleton {
@@ -60,6 +72,9 @@ public:
 	void Initialize();
 	void ProcessAnimationGraph(float time, std::vector<dx::XMMATRIX>& matrix_buffer,
 		Animation& anim, std::vector<TrackData>& track_buffer);
+	bool ProcessBlendAnimationGraph(float time, std::vector<dx::XMMATRIX>& matrix_buffer,
+			Animation& anim, Animation& anim_next, std::vector<TrackData>& track_buffer,
+			float normalized_velo);
 	void ProcessBindPose(std::vector<dx::XMMATRIX>& buffer);
 
 	std::vector<Bone*> hierarchy;
@@ -76,8 +91,20 @@ public:
 
 	float animation_time;
 	float animation_speed;
-	Skeleton* skeleton;
+
+	//Velocity threshold to make the animation switch to running.
+	float animation_run_threshold;
+
+	//Check if we are blending between two animations currently
+	bool animation_blending;
+	
+	//Flag to perform animation blending or not
+	bool animation_blending_enabled = true;
+
+	std::unique_ptr<Skeleton> skeleton;
 	Animation* active_animation;
+	Animation* next_animation;
+	std::unique_ptr<Path> animation_path;
 	std::vector<TrackData> animation_track_data;
 	std::vector<dx::XMMATRIX> bone_matrix_buffer;
 	std::vector<Animation*> animations;
@@ -87,4 +114,10 @@ public:
 	void ProcessBindPose();
 	void SetSkel(Skeleton* skel);
 	void AddAnimation(Animation* anim);
+	void SetAnimationPath(Path* path);
+	void SetActiveAnimation(unsigned int animation_index);
+	void SwitchAnimation(unsigned int animation_index);
+
+	void ShowPathControls();
+	void ShowAnimationControls();
 };

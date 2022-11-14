@@ -31,16 +31,13 @@ private:
 	std::unique_ptr<Mesh> draw_mesh;
 	std::unique_ptr<Animation> animation;
 	std::unique_ptr<Model> draw_model;
-	std::unique_ptr<Path> animation_path;
 	std::unique_ptr<Curve> draw_path;
 
-	float space_curve_u = 0.0f;
 	float speed_factor = 1.0f;
 	Camera cam;
 
 	TimerWrap timer;
 	static constexpr size_t nDrawables = 2;
 	void SpawnSimulationWindow() noexcept;
-	void SpawnSpaceCurveWindow() noexcept;
 };
 

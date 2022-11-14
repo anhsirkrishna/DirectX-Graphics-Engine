@@ -72,8 +72,7 @@ LineTree::LineTree(Graphics& gfx, const Skeleton& skeleton) {
 }
 
 DirectX::XMMATRIX LineTree::GetTransformXM() const noexcept {
-	namespace dx = DirectX;
-	return dx::XMLoadFloat4x4(&mt);
+	return mt;
 }
 
 void LineTree::Update(float dt) noexcept {
@@ -94,7 +93,11 @@ void LineTree::SetPosition(DirectX::XMFLOAT3 _pos) {
 	position = _pos;
 }
 
+void LineTree::SetRotation(const DirectX::XMMATRIX& _rot) {
+	rotation = _rot;
+}
+
 void LineTree::SetModelTransform() {
-	dx::XMStoreFloat4x4(&mt, 
+	mt = dx::XMMatrixMultiply(rotation,
 		dx::XMMatrixTranslation(position.x, position.y, position.z));
 }

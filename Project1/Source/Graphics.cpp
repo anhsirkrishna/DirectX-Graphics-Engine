@@ -59,8 +59,15 @@ Graphics::Graphics(HWND hWnd, int width, int height)
 	dsDesc.DepthEnable = TRUE;
 	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
-	wrl::ComPtr<ID3D11DepthStencilState> pDSState;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDSState;
 	pDevice->CreateDepthStencilState(&dsDesc, &pDSState);
+
+	//// create depth stensil state for no depth test
+	//D3D11_DEPTH_STENCIL_DESC dsDesc_disable = {};
+	//dsDesc_disable.DepthEnable = TRUE;
+	//dsDesc_disable.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	//dsDesc_disable.DepthFunc = D3D11_COMPARISON_ALWAYS;
+	//pDevice->CreateDepthStencilState(&dsDesc_disable, &pDSState_disable);
 
 	// bind depth state
 	pContext->OMSetDepthStencilState(pDSState.Get(), 1u);
@@ -183,6 +190,14 @@ void Graphics::SetWireframeMode() noexcept {
 void Graphics::SetFillMode() noexcept {
 	pContext->RSSetState(pFill_RS.Get());
 }
+
+//void Graphics::DisableDepthTest() {
+//	pContext->OMSetDepthStencilState(pDSState_disable.Get(), 1u);
+//}
+//
+//void Graphics::EnableDepthTest() {
+//	pContext->OMSetDepthStencilState(pDSState.Get(), 1u);
+//}
 
 void Graphics::InitRenderStates() noexcept {
 	D3D11_RASTERIZER_DESC wf_desc;

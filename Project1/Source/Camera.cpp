@@ -36,9 +36,9 @@ void Camera::SpawnCameraControls() noexcept {
 }
 
 void Camera::Reset() noexcept {
-	r = 20.0f;
+	r = 400.0f;
 	theta = 0.0f;
-	phi = 0.0f;
+	phi = DirectX::XMConvertToRadians(35.0f);
 	pitch = 0.0f;
 	yaw = 0.0f;
 	roll = 0.0f;

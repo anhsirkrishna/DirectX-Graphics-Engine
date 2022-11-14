@@ -7,11 +7,14 @@ public:
 	void SetBoneTransform(unsigned int index, const DirectX::XMMATRIX& transform);
 	void SyncBones(Graphics& gfx);
 	void SetPosition(DirectX::XMFLOAT3 _pos);
+	void SetRotation(const DirectX::XMMATRIX& _rot);
 	void SetModelTransform();
 private:
 	// model transform
-	DirectX::XMFLOAT4X4 mt;
+	DirectX::XMMATRIX mt;
 	DirectX::XMFLOAT3 position;
+	DirectX::XMMATRIX rotation;
+
 	struct VSBonesConstant
 	{
 		DirectX::XMMATRIX bones_transform[96];

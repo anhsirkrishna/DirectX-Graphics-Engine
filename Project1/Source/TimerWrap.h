@@ -9,4 +9,5 @@ public:
 	float Peek() const noexcept;
 private:
 	std::chrono::steady_clock::time_point last;
+	std::chrono::steady_clock::time_point start;
 };
