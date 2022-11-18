@@ -45,12 +45,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)FBX\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)stbi\include;$(SolutionDir)FBX\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)FBX\lib\vs2019\x64\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)FBX\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)stbi\include;$(SolutionDir)FBX\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)FBX\lib\vs2019\x64\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -88,6 +88,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Sampler.cpp" />
     <ClCompile Include="Source\DynamicVertexBuffer.cpp" />
     <ClCompile Include="Source\Curve.cpp" />
     <ClCompile Include="Source\Path.cpp" />
@@ -130,8 +131,10 @@
     <ClCompile Include="Source\TimerWrap.cpp" />
     <ClCompile Include="Source\VQS.cpp" />
     <ClCompile Include="Source\Texture.cpp" />
+    <ClCompile Include="Source\WICTextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Sampler.h" />
     <ClInclude Include="Source\DynamicVertexBuffer.h" />
     <ClInclude Include="Source\Curve.h" />
     <ClInclude Include="Source\Path.h" />
@@ -183,6 +186,7 @@
     <ClInclude Include="Source\VQS.h" />
     <ClInclude Include="Source\FBXUtil.h" />
     <ClInclude Include="Source\Texture.h" />
+    <ClInclude Include="Source\WICTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Source\CurvePS.hlsl">

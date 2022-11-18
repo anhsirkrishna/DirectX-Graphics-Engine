@@ -1,9 +1,9 @@
 #include "Model.h"
 #include "imgui/imgui.h"
 
-void Model::LoadModel(Graphics& gfx, FBXLoader* fbx_loader) {
+void Model::LoadModel(Graphics& gfx, FBXLoader* fbx_loader, const wchar_t* tex_file_path) {
 	FBXMesh fbx_mesh = *(fbx_loader->meshes[0]);
-	mesh = new Mesh(gfx, fbx_mesh);
+	mesh = new Mesh(gfx, fbx_mesh, tex_file_path);
 	
 	FBXSkeleton fbx_skele = fbx_loader->skele;
 	controller = new AnimationController();
@@ -38,10 +38,10 @@ void Model::Draw(Graphics& gfx) {
 	}
 	
 	if (draw_skeleton) {
-		//gfx.DisableDepthTest();
+		gfx.DisableDepthTest();
 		skeleton_drawable->SyncBones(gfx);
 		skeleton_drawable->Draw(gfx);
-		//gfx.EnableDepthTest();
+		gfx.EnableDepthTest();
 	}
 }
 
@@ -93,18 +93,9 @@ void Model::Reset() {
 void Model::SpawnModelControls() noexcept {
 	if (ImGui::Begin("Model"))
 	{
-		ImGui::Text("Model");
 		ImGui::Checkbox("Display Mesh", &draw_mesh);
 		ImGui::Checkbox("Display Skeleton", &draw_skeleton);
 		ImGui::Checkbox("Bind pose", &is_bind_pose);
-		ImGui::Text("Position");
-		ImGui::SliderFloat("X", &position.x, -1000.0f, 1000.0f, "%.1f");
-		ImGui::SliderFloat("Y", &position.y, -1000.0f, 1000.0f, "%.1f");
-		ImGui::SliderFloat("Z", &position.z, -1000.0f, 1000.0f, "%.1f");
-		if (ImGui::Button("Reset"))
-		{
-			Reset();
-		}
 	}
 	ImGui::End();
 }

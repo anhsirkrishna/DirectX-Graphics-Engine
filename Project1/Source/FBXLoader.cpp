@@ -100,11 +100,8 @@ void PrintRootNode(FbxNode* pNode) {
 
 FBXLoader::FBXLoader() : bind_pose(nullptr) {
 	/*
-	* "Facial & Body Animated Toon Goon - ActorCore" (https://skfb.ly/oyvBs) by Reallusion is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
-	*/
-	
-	/*
-	* "Dwarf Warrior" (https://skfb.ly/6VZNo) by Northcliffe is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+	* "Human mesh animated"
+	* https://www.turbosquid.com/3d-models/free-human-base-mesh-animations-3d-model/1049650
 	*/
 
 	const char* filename = "BaseMesh_Anim.fbx";

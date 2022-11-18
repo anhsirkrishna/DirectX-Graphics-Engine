@@ -55,7 +55,7 @@ public:
 	* Returns: bool - True if the blending has finished
 	*/
 	bool CalculateBlendTransform(float animTime, int trackIndex, Animation& next_animation,
-								 VQS& animation_transform, TrackData& data,
+								 VQS& animation_transform, TrackData& data, TrackData& next_data,
 								 float normalized_velo);
 	
 	void ConvertFromFbx(FBXAnimation* fbx_animation);
@@ -73,7 +73,8 @@ public:
 	void ProcessAnimationGraph(float time, std::vector<dx::XMMATRIX>& matrix_buffer,
 		Animation& anim, std::vector<TrackData>& track_buffer);
 	bool ProcessBlendAnimationGraph(float time, std::vector<dx::XMMATRIX>& matrix_buffer,
-			Animation& anim, Animation& anim_next, std::vector<TrackData>& track_buffer,
+			Animation& anim, Animation& anim_next, 
+			std::vector<TrackData>& track_buffer, std::vector<TrackData>& next_track_buffer,
 			float normalized_velo);
 	void ProcessBindPose(std::vector<dx::XMMATRIX>& buffer);
 
@@ -106,6 +107,7 @@ public:
 	Animation* next_animation;
 	std::unique_ptr<Path> animation_path;
 	std::vector<TrackData> animation_track_data;
+	std::vector<TrackData> next_animation_track_data;
 	std::vector<dx::XMMATRIX> bone_matrix_buffer;
 	std::vector<Animation*> animations;
 

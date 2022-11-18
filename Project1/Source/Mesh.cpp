@@ -5,10 +5,15 @@
 #include "InputLayout.h"
 #include "Topology.h"
 #include "TransformCBuf.h"
+#include "Texture.h"
+#include "Sampler.h"
 #include <memory>
 #include "imgui/imgui.h"
 
-Mesh::Mesh(Graphics& gfx, FBXMesh& fbx_mesh) {
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+Mesh::Mesh(Graphics& gfx, FBXMesh& fbx_mesh, const wchar_t* tex_file_path) {
 	namespace dx = DirectX;
 
 	if (!IsStaticInitialized())
@@ -69,6 +74,10 @@ Mesh::Mesh(Graphics& gfx, FBXMesh& fbx_mesh) {
 	AddBind(std::make_unique<TransformCBuf>(gfx, *this));
 
 	AddBind(std::make_unique<BonesCbuf>(gfx, bones_cbuf, 1u));
+
+	AddBind(std::make_unique<Texture>(gfx, tex_file_path));
+
+	AddBind(std::make_unique<Sampler>(gfx));
 
 	// model deformation transform (per instance, not stored as bind)
 	mt = dx::XMMatrixTranslation(0.0f, -2.5f, 0.0f);

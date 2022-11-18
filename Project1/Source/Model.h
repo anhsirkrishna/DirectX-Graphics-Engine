@@ -9,7 +9,7 @@ class Model
 public:
 	Model() = default;
 	~Model() = default;
-	void LoadModel(Graphics& gfx, FBXLoader* fbx_loader);
+	void LoadModel(Graphics& gfx, FBXLoader* fbx_loader, const wchar_t* tex_file_path);
 	void Draw(Graphics& gfx);
 	void Update(float dt) noexcept;
 	void Reset();

@@ -16,43 +16,45 @@ int WindowWidth = 1280;
 namespace dx = DirectX;
 
 App::App() : window(WindowWidth, WindowHeight, TEXT("Direct3D Engine")) {
-	window.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 1000.0f));
+	cam.SetControlWindow(&window);
+
+	window.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 2000.0f));
 	DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	draw_line = std::make_unique<Line>(window.Gfx(), color);
 
 	fbx_loader.ExtractSceneData();
 	
 	draw_model = std::make_unique<Model>();
-	draw_model->LoadModel(window.Gfx(), &fbx_loader);
+	draw_model->LoadModel(window.Gfx(), &fbx_loader, TEXT("Max_Red_Body_Diffuse.png"));
 
 	std::unique_ptr<Path> animation_path = std::make_unique<Path>();
 	animation_path->AddControlSegment();
-	animation_path->AddControlPoint(dx::XMFLOAT3(-240.0f, 0.0f, 240.0f), 0);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-280.0f, 0.0f, 200.0f), 0);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-300.0f, 0.0f, 160.0f), 0);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-280.0f, 0.0f, 100.0f), 0);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-240.0f, 0.0f, 60.0f), 0);
+	animation_path->AddControlPoint(dx::XMFLOAT3(-140.0f, 0.0f, 190.0f), 0);
+	animation_path->AddControlPoint(dx::XMFLOAT3(-180.0f, 0.0f, 150.0f), 0);
+	animation_path->AddControlPoint(dx::XMFLOAT3(-200.0f, 0.0f, 110.0f), 0);
+	animation_path->AddControlPoint(dx::XMFLOAT3(-180.0f, 0.0f, 50.0f), 0);
+	animation_path->AddControlPoint(dx::XMFLOAT3(-140.0f, 0.0f, 10.0f), 0);
 
 	animation_path->AddControlSegment();
-	animation_path->AddControlPoint(dx::XMFLOAT3(-200.0f, 0.0f, 100.0f), 1);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-120.0f, 0.0f, -40.0f), 1);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-60.0f, 0.0f, 40.0f), 1);
-	animation_path->AddControlPoint(dx::XMFLOAT3(0.0f, 0.0f, -40.0f), 1);
+	animation_path->AddControlPoint(dx::XMFLOAT3(-100.0f, 0.0f, 50.0f), 1);
+	animation_path->AddControlPoint(dx::XMFLOAT3(-20.0f, 0.0f, -90.0f), 1);
+	animation_path->AddControlPoint(dx::XMFLOAT3(40.0f, 0.0f, -10.0f), 1);
+	animation_path->AddControlPoint(dx::XMFLOAT3(100.0f, 0.0f, -90.0f), 1);
 
 	animation_path->AddControlSegment();
-	animation_path->AddControlPoint(dx::XMFLOAT3(40.0f, 0.0f, -60.0f), 2);
-	animation_path->AddControlPoint(dx::XMFLOAT3(10.0f, 0.0f, 60.0f), 2);
-	animation_path->AddControlPoint(dx::XMFLOAT3(60.0f, 0.0f, 80.0f), 2);
-	animation_path->AddControlPoint(dx::XMFLOAT3(10.0f, 0.0f, 120.0f), 2);
-	animation_path->AddControlPoint(dx::XMFLOAT3(60.0f, 0.0f, 160.0f), 2);
+	animation_path->AddControlPoint(dx::XMFLOAT3(140.0f, 0.0f, -110.0f), 2);
+	animation_path->AddControlPoint(dx::XMFLOAT3(110.0f, 0.0f, 10.0f), 2);
+	animation_path->AddControlPoint(dx::XMFLOAT3(160.0f, 0.0f, 30.0f), 2);
+	animation_path->AddControlPoint(dx::XMFLOAT3(110.0f, 0.0f, 70.0f), 2);
+	animation_path->AddControlPoint(dx::XMFLOAT3(160.0f, 0.0f, 110.0f), 2);
 
 	animation_path->AddControlSegment();
-	animation_path->AddControlPoint(dx::XMFLOAT3(20.0f, 0.0f, 200.0f), 3);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-60.0f, 0.0f, 240.0f), 3);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-100.0f, 0.0f, 280.0f), 3);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-140.0f, 0.0f, 300.0f), 3);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-180.0f, 0.0f, 320.0f), 3);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-220.0f, 0.0f, 270.0f), 3);
+	animation_path->AddControlPoint(dx::XMFLOAT3(120.0f, 0.0f, 150.0f), 3);
+	animation_path->AddControlPoint(dx::XMFLOAT3(40.0f, 0.0f, 190.0f), 3);
+	animation_path->AddControlPoint(dx::XMFLOAT3(0.0f, 0.0f, 230.0f), 3);
+	animation_path->AddControlPoint(dx::XMFLOAT3(-40.0f, 0.0f, 250.0f), 3);
+	animation_path->AddControlPoint(dx::XMFLOAT3(-80.0f, 0.0f, 270.0f), 3);
+	animation_path->AddControlPoint(dx::XMFLOAT3(-120.0f, 0.0f, 220.0f), 3);
 
 	animation_path->Scale(2.0f, 2.0f, 2.0f);
 
@@ -76,6 +78,8 @@ void App::Update() {
 
 	const auto dt = timer.Mark() * speed_factor;
 	window.Gfx().BeginFrame();
+	
+	cam.Update(dt);
 	window.Gfx().SetCamera(cam.GetMatrix());
 
 	draw_model->Update(window.keyboard.isKeyPressed(VK_SPACE) ? 0.0f : dt);

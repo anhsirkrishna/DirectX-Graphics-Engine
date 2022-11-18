@@ -76,14 +76,16 @@ void Skeleton::ProcessAnimationGraph(float time, std::vector<dx::XMMATRIX>& matr
 }
 
 bool Skeleton::ProcessBlendAnimationGraph(float time, std::vector<dx::XMMATRIX>& matrix_buffer,
-	Animation& anim_prev, Animation& anim_next, std::vector<TrackData>& track_buffer, float normalized_velo) {
+	Animation& anim_prev, Animation& anim_next, 
+	std::vector<TrackData>& track_buffer, std::vector<TrackData>& next_track_buffer,
+	float normalized_velo) {
 	bool blend_completed = true;
 	for (unsigned int boneIndex = 0; boneIndex < hierarchy.size(); ++boneIndex)
 	{
 		Bone* bone = hierarchy[boneIndex];
 		VQS animation_transform;
 		blend_completed &= anim_prev.CalculateBlendTransform(time, boneIndex, anim_next,
-			animation_transform, track_buffer[boneIndex], normalized_velo);
+			animation_transform, track_buffer[boneIndex], next_track_buffer[boneIndex], normalized_velo);
 		dx::XMMATRIX parent_transform = bone->parent_indx != -1 ? matrix_buffer[bone->parent_indx] : dx::XMMatrixIdentity();
 		dx::XMMATRIX local_transform = animation_transform.toMatrix();
 		dx::XMMATRIX modelTransform = local_transform * parent_transform;
@@ -154,8 +156,10 @@ void AnimationController::Update(float dt) {
 
 void AnimationController::ClearTrackData() {
 	//Reset all the keys back to zero
-	for (auto& animation_track : animation_track_data)
-		animation_track.last_key = 0;
+	for (unsigned int i = 0; i < animation_track_data.size(); ++i) {
+		animation_track_data[i].last_key = 0;
+		next_animation_track_data[i].last_key = 0;
+	}
 
 }
 
@@ -166,12 +170,14 @@ void AnimationController::Process() {
 		//Blend between the two if we are
 		bool blend_complete = 
 			skeleton->ProcessBlendAnimationGraph(animation_time, bone_matrix_buffer, 
-				*active_animation, *next_animation, animation_track_data, noramlized_velo);
+				*active_animation, *next_animation, 
+				animation_track_data, next_animation_track_data, noramlized_velo);
 		//Check if blending is complete
 		if (blend_complete) {
 			animation_blending = false;
 			active_animation = next_animation;
 			next_animation = nullptr;
+			ClearTrackData();
 		}
 
 	}
@@ -190,6 +196,7 @@ void AnimationController::SetSkel(Skeleton* skel) {
 	skeleton.reset(skel);
 	bone_matrix_buffer.resize(skeleton->hierarchy.size());
 	animation_track_data.resize(skeleton->hierarchy.size());
+	next_animation_track_data.resize(skeleton->hierarchy.size());
 	ClearTrackData();
 }
 
@@ -232,7 +239,8 @@ void AnimationController::ShowPathControls() {
 	if (ImGui::Begin("Animtion Path"))
 	{
 		float curr_time = animation_path->GetCurrentPathTime();
-		float curr_distance = animation_path->GetDistanceFromTime(curr_time);
+		float norm_distance = animation_path->GetSinDistanceFromTime(curr_time);
+		float curr_distance = norm_distance * animation_path->GetDistance(1);
 		ImGui::Text("Distance : %f", curr_distance);
 		float curr_u = animation_path->GetU(curr_distance);
 		ImGui::Text("Inverse Distance : %f", curr_u);
@@ -242,7 +250,6 @@ void AnimationController::ShowPathControls() {
 		ImGui::Text("Velocity : %f", velocity);
 		ImGui::Text("curr_time : %f", curr_time);
 		ImGui::Text("Normalized T : %f", animation_path->GetNormalizedT(curr_time));
-		ImGui::Text("Distance : %f", animation_path->GetDistanceFromTime(curr_time));
 
 		ImGui::SliderFloat("Path velocity", &animation_path->constant_velocity, 500, 1200.0f, "%.4f");
 		if (ImGui::Button("Recalculate velo functions") ) {
@@ -315,8 +322,9 @@ void Animation::CalculateTransform(float animTime, int trackIndex, VQS& animatio
 
 bool Animation::CalculateBlendTransform(float animTime, int trackIndex, 
 										Animation& next_animation, VQS& animation_transform, 
-										TrackData& data, float normalized_velo) {
+										TrackData& data, TrackData& next_data, float normalized_velo) {
 	int curr_key = data.last_key;
+	int next_curr_key = next_data.last_key;
 
 	//Track for current animation
 	Track& curr_path = tracks[trackIndex];
@@ -324,24 +332,30 @@ bool Animation::CalculateBlendTransform(float animTime, int trackIndex,
 	//Track for the next animation to blend into
 	Track& next_anim_curr_path = next_animation.tracks[trackIndex];
 
-	if (curr_key >= next_anim_curr_path.key_frames.size())
-		curr_key = 0;
-
 	//Search Forward in the keyframes for the interval
-	while (curr_key != next_anim_curr_path.key_frames.size() - 1 &&
-		next_anim_curr_path.key_frames[curr_key + 1].time < animTime)
+	while (curr_key != curr_path.key_frames.size() - 1 &&
+		curr_path.key_frames[curr_key + 1].time < animTime)
 		++curr_key;
 
 	//Search Backward in the keyframes for the interval
-	while (curr_key != 0 && next_anim_curr_path.key_frames[curr_key].time > animTime)
+	while (curr_key != 0 && curr_path.key_frames[curr_key].time > animTime)
 		--curr_key;
+
+	//Search Forward in the keyframes for the interval
+	while (next_curr_key != next_anim_curr_path.key_frames.size() - 1 &&
+		next_anim_curr_path.key_frames[next_curr_key + 1].time < animTime)
+		++next_curr_key;
+
+	//Search Backward in the keyframes for the interval
+	while (next_curr_key != 0 && next_anim_curr_path.key_frames[next_curr_key].time > animTime)
+		--next_curr_key;
 
 	//Flag to check if the blending is done between two animations
 	bool blend_completed = false;
-	if (curr_key == next_anim_curr_path.key_frames.size() - 1)
+	if (next_curr_key == next_anim_curr_path.key_frames.size() - 1)
 	{
 		//Clamp animation to the last frame of the next animation
-		animation_transform = next_anim_curr_path.key_frames[curr_key].transform;
+		animation_transform = next_anim_curr_path.key_frames[next_curr_key].transform;
 		blend_completed = true;
 	}
 	else 
@@ -350,18 +364,11 @@ bool Animation::CalculateBlendTransform(float animTime, int trackIndex,
 		//Interpolate between the two frames
 		
 		//Initialize key_prev_0 in case curr_key goes beyond that path
-		KeyFrame& key_prev_0 = curr_path.key_frames.back();
-		KeyFrame& key_prev_1 = curr_path.key_frames.back();
-		if (curr_key < curr_path.key_frames.size() - 1) {
-			key_prev_0 = curr_path.key_frames[curr_key];
-			key_prev_1 = curr_path.key_frames[curr_key + 1];
-		}
-		else {
-			blend_completed = true;
-		}
+		KeyFrame& key_prev_0 = curr_path.key_frames[curr_key];
+		KeyFrame& key_prev_1 = curr_path.key_frames[curr_key + 1];
 		
-		KeyFrame& key_next_0 = next_anim_curr_path.key_frames[curr_key];
-		KeyFrame& key_next_1 = next_anim_curr_path.key_frames[curr_key + 1];
+		KeyFrame& key_next_0 = next_anim_curr_path.key_frames[next_curr_key];
+		KeyFrame& key_next_1 = next_anim_curr_path.key_frames[next_curr_key + 1];
 
 		float t1 = key_next_0.time;
 		float t2 = key_next_1.time;
@@ -377,6 +384,7 @@ bool Animation::CalculateBlendTransform(float animTime, int trackIndex,
 
 	//Remember the last keyframe
 	data.last_key = curr_key;
+	next_data.last_key = next_curr_key;
 	return blend_completed;
 }
 

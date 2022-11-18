@@ -151,31 +151,6 @@ Quaternion Quaternion::fromMatrix(const dx::XMMATRIX& _mat) {
 
 //Slerp between two quaternions
 Quaternion Quaternion::InterpolateTo(const Quaternion& q_n, float t) {
-	/*
-	float d_p = DotProduct(q_n);
-
-	if (d_p < 0)
-	{
-		d_p = -d_p;
-	}
-	else if (d_p == 1)
-	{
-		return Quaternion(s, v);
-	}
-	float alpha = dx::XMScalarACos(d_p);
-	float sin_alpha = dx::XMScalarSin(alpha);
-	float sin_t_alpha = dx::XMScalarSin(t * alpha);
-	float sin_t_m_alpha = dx::XMScalarSin((1 - t) * alpha);
-	
-	float t_s = ((s * sin_t_m_alpha) / sin_alpha) + ((q_n.s * sin_t_m_alpha) / sin_alpha);
-	dx::XMFLOAT3 t_v(
-		((v.x * sin_t_m_alpha) / sin_alpha) + ((q_n.v.x * sin_t_m_alpha) / sin_alpha),
-		((v.y * sin_t_m_alpha) / sin_alpha) + ((q_n.v.y * sin_t_m_alpha) / sin_alpha),
-		((v.z * sin_t_m_alpha) / sin_alpha) + ((q_n.v.z * sin_t_m_alpha) / sin_alpha));
-
-
-	return Quaternion(t_s, t_v);
-	*/
 	float slerp_epsilon = 0.00001f;
 	float d_p = DotProduct(q_n);
 

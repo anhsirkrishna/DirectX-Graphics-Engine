@@ -6,7 +6,7 @@
 class Mesh : public DrawableBase<Mesh>
 {
 public:
-	Mesh(Graphics& gfx, FBXMesh& fbx_mesh);
+	Mesh(Graphics& gfx, FBXMesh& fbx_mesh, const wchar_t* tex_file_name);
 	~Mesh();
 
 	void Update(float dt) noexcept override;

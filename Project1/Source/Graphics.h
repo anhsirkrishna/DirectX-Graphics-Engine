@@ -30,8 +30,8 @@ public:
 	bool IsImguiEnabled() const noexcept;
 	void SetWireframeMode() noexcept;
 	void SetFillMode() noexcept;
-	/*void DisableDepthTest();
-	void EnableDepthTest();*/
+	void DisableDepthTest();
+	void EnableDepthTest();
 private:
 	void InitRenderStates() noexcept;
 	Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
@@ -41,8 +41,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDSV;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> pWireFrame_RS;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> pFill_RS;
-	/*Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDSState;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDSState_disable;*/
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDepthEnabled_DSS;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDepthDisabled_DSS;
 	
 	DirectX::XMMATRIX projection;
 	DirectX::XMMATRIX camera;

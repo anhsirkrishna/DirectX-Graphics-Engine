@@ -178,6 +178,12 @@
     <ClCompile Include="Source\DynamicVertexBuffer.cpp">
       <Filter>Source\Graphics\Bindables</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Sampler.cpp">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\WICTextureLoader.cpp">
+      <Filter>Source\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Bindable.h">
@@ -332,6 +338,12 @@
     </ClInclude>
     <ClInclude Include="Source\DynamicVertexBuffer.h">
       <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Sampler.h">
+      <Filter>Source\Graphics\Bindables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\WICTextureLoader.h">
+      <Filter>Source\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
