@@ -10,9 +10,6 @@
 #include <memory>
 #include "imgui/imgui.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 Mesh::Mesh(Graphics& gfx, FBXMesh& fbx_mesh, const wchar_t* tex_file_path) {
 	namespace dx = DirectX;
 
