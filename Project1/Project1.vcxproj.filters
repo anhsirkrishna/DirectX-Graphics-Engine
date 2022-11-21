@@ -50,6 +50,9 @@
     <Filter Include="Source\FBX\Util">
       <UniqueIdentifier>{4f3f8f54-d65a-478e-9bd3-041dcd6ea0a3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Projects">
+      <UniqueIdentifier>{53c25841-a54e-43a3-85a4-f435aa4d5a74}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window.cpp">
@@ -183,6 +186,21 @@
     </ClCompile>
     <ClCompile Include="Source\WICTextureLoader.cpp">
       <Filter>Source\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Project_IK.cpp">
+      <Filter>Source\Projects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Project_PathAnimation.cpp">
+      <Filter>Source\Projects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Project.cpp">
+      <Filter>Source\Projects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\IKinematics.cpp">
+      <Filter>Source\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SolidSphere.cpp">
+      <Filter>Source\Graphics\Drawables</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -344,6 +362,24 @@
     </ClInclude>
     <ClInclude Include="Source\WICTextureLoader.h">
       <Filter>Source\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Project.h">
+      <Filter>Source\Projects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Project_IK.h">
+      <Filter>Source\Projects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Project_PathAnimation.h">
+      <Filter>Source\Projects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\IKinematics.h">
+      <Filter>Source\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Sphere.h">
+      <Filter>Source\Graphics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SolidSphere.h">
+      <Filter>Source\Graphics\Drawables</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

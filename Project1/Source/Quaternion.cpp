@@ -10,6 +10,11 @@ Quaternion::Quaternion(const dx::XMMATRIX& _mat) {
 	v = t_q.v;
 }
 
+Quaternion::Quaternion(const dx::XMVECTOR& q) {
+	dx::XMStoreFloat3(&v, q);
+	s = dx::XMVectorGetW(q);
+}
+
 Quaternion Quaternion::Add(const Quaternion& b) const {
 	float t_s = s + b.s;
 	dx::XMFLOAT3 t_v(v.x+b.v.x, v.y+b.v.y, v.z + b.v.z);

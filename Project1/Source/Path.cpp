@@ -29,6 +29,14 @@ void Path::SetSubdivisionCount(int _subdivision_count) {
 }
 
 std::vector<dx::XMFLOAT3> Path::GeneratePath() {
+	//If it's not a loop we need to add an extra point to the start and end of the path
+	if (not loop) {
+		AppendExtraPoints();
+		//Generate the path using a different method if it's not looped
+		return GenerateUnloopedPath();
+	}
+		
+
 	std::vector<dx::XMFLOAT3> path_points;
 	for (unsigned int j = 0; j < control_segments.size(); j++) {
 		for (unsigned int i = 0; i < control_segments[j].size(); i++) {
@@ -62,6 +70,49 @@ std::vector<dx::XMFLOAT3> Path::GeneratePath() {
 						dx::XMVectorGetY(new_point),
 						dx::XMVectorGetZ(new_point)));
 			}
+		}
+	}
+	return path_points;
+}
+
+/*
+* Generates a list of points that represents the path in world space.
+* Constructs the path from the control_points consisting of a single
+* segment with no loops.
+* Returns: Vector<FLOAT3> - the list of points
+*/
+std::vector<dx::XMFLOAT3> Path::GenerateUnloopedPath() {
+	std::vector<dx::XMFLOAT3> path_points;
+	for (unsigned int i = 1; i < control_segments[0].size() - 2; i++) {
+		dx::XMVECTOR pi_prev;
+		dx::XMVECTOR pi;
+		dx::XMVECTOR pi_next;
+		dx::XMVECTOR pi_next_next;
+
+		GetPointsFromIndexNoLoop(i, pi_prev, pi, pi_next, pi_next_next);
+
+		// itr = ((Pi+1 - Pi-1) / k);
+		dx::XMVECTOR itr_a = dx::XMVectorScale(
+			dx::XMVectorSubtract(pi_next, pi_prev), 1.0f / k);
+
+		// a = Pi + ((Pi+1 - Pi-1) / k);
+		dx::XMVECTOR a = dx::XMVectorAdd(pi, itr_a);
+
+		// itr = ((Pi+2 - Pi) / k);
+		dx::XMVECTOR itr_b = dx::XMVectorScale(
+			dx::XMVectorSubtract(pi_next_next, pi), 1.0f / k);
+
+		// b = Pi+1 - ((Pi+2 - Pi) / k);
+		dx::XMVECTOR b = dx::XMVectorSubtract(pi_next, itr_b);
+
+		for (int j = 0; j < subdivision_count; j++) {
+			float u = (float)j / subdivision_count;
+			dx::XMVECTOR new_point = BezierFunc(u, pi, a, b, pi_next);
+			path_points.push_back(
+				dx::XMFLOAT3(
+					dx::XMVectorGetX(new_point),
+					dx::XMVectorGetY(new_point),
+					dx::XMVectorGetZ(new_point)));
 		}
 	}
 	return path_points;
@@ -168,25 +219,48 @@ dx::XMVECTOR Path::GetSegmentPosition(float u, unsigned int segment_indx) {
 	int point_indx = 0;
 	float final_u = 0.0f;
 	if (u == 1) {
-		point_indx = control_segments[segment_indx].size() - 1;
+		//If it's not a loop then discount the first and last points 
+		// as they are not part of the path
+		if (not loop)
+			point_indx = control_segments[segment_indx].size() - 3;
+		else
+			point_indx = control_segments[segment_indx].size() - 1;
 		final_u = 1;
 	}
 	else if (u == 0) {
-		point_indx = 0;
+		//If it's not a loop then discount the first and last points 
+		// as they are not part of the path
+		if (not loop) 
+			point_indx = 1;
+		else 
+			point_indx = 0;
 		final_u = 0;
 	}
 	else {
-		point_indx_f = u * control_segments[segment_indx].size();
-		point_indx = (int)point_indx_f;
-		final_u = point_indx_f - point_indx;
+		if (not loop) {
+			//If it's not a loop then discount the first and last points 
+			// as they are not part of the path
+			point_indx_f = u * (control_segments[segment_indx].size() - 3);
+			point_indx = (int)point_indx_f;
+			final_u = point_indx_f - point_indx;
+			point_indx += 1;
+		}
+		else {
+			point_indx_f = u * control_segments[segment_indx].size();
+			point_indx = (int)point_indx_f;
+			final_u = point_indx_f - point_indx;
+		}
 	}
 
 	dx::XMVECTOR pi_prev;
 	dx::XMVECTOR pi;
 	dx::XMVECTOR pi_next;
 	dx::XMVECTOR pi_next_next;
-
-	GetPointsFromIndex(point_indx, segment_indx, pi_prev, pi, pi_next, pi_next_next);
+	
+	if (not loop)
+		GetPointsFromIndexNoLoop(point_indx, pi_prev, pi, pi_next, pi_next_next);
+	else
+		GetPointsFromIndex(point_indx, segment_indx, pi_prev, pi, pi_next, pi_next_next);
 
 	// itr = ((Pi+1 - Pi-1) / k);
 	dx::XMVECTOR itr_a = dx::XMVectorScale(
@@ -459,6 +533,10 @@ void Path::GetPointsFromIndex(
 	dx::XMVECTOR& pi_prev, dx::XMVECTOR& pi, 
 	dx::XMVECTOR& pi_next, dx::XMVECTOR& pi_next_next) {
 
+	//If the path is not a loop use a different function
+	if (!loop)
+		GetPointsFromIndexNoLoop(point_indx, pi_prev, pi, pi_next, pi_next_next);
+
 	unsigned int next_segment_indx = segment_indx + 1;
 	unsigned int prev_segment_indx = segment_indx - 1;
 
@@ -494,6 +572,21 @@ void Path::GetPointsFromIndex(
 		pi_next = dx::XMLoadFloat3(&control_segments[segment_indx][point_indx + 1]);
 		pi_next_next = dx::XMLoadFloat3(&control_segments[segment_indx][point_indx + 2]);
 	}
+}
+
+void Path::GetPointsFromIndexNoLoop(unsigned int point_indx, 
+	dx::XMVECTOR& pi_prev, dx::XMVECTOR& pi, 
+	dx::XMVECTOR& pi_next, dx::XMVECTOR& pi_next_next) {
+	pi_prev = dx::XMLoadFloat3(&control_segments[0][point_indx - 1]);
+	pi = dx::XMLoadFloat3(&control_segments[0][point_indx]);
+	pi_next = dx::XMLoadFloat3(&control_segments[0][point_indx] + 1);
+
+	if (point_indx == control_segments[0].size() - 2) {
+		//Calculate a new point for a last point 
+		pi_next_next = dx::XMVectorAdd(pi_next, dx::XMVectorSubtract(pi_next, pi));
+	}
+	else
+		pi_next_next = dx::XMLoadFloat3(&control_segments[0][point_indx] + 2);
 }
 
 void Path::AdaptiveExpand() {
@@ -546,6 +639,43 @@ void Path::AdaptiveExpand() {
 	}
 }
 
+/*
+* Append extra points to the start and end of the path if there's no loop
+* for the bezier function
+*/
+void Path::AppendExtraPoints() {
+	
+	dx::XMFLOAT3 p0 = control_segments[0][0];
+	dx::XMFLOAT3 p1 = control_segments[0][1];
+
+	//Calculate the position for the point to be appended at the start
+	dx::XMFLOAT3 diff(p0.x - p1.x, p0.y - p1.y, p0.z - p1.z);
+	dx::XMFLOAT3 p0_prev(p0.x + diff.x, p0.y + diff.y, p0.z + diff.z);
+
+	//Get the last two points in the path to calculate the new last point
+	unsigned int point_list_size = control_segments[0].size();
+	dx::XMFLOAT3 pn = control_segments[0][point_list_size - 1];
+	dx::XMFLOAT3 pn_prev = control_segments[0][point_list_size - 2];
+
+	//Add an extra slot at the end
+	control_segments[0].push_back(dx::XMFLOAT3());
+
+	//Shift the control points to make room for the new starting point
+	for (unsigned int i = point_list_size; i > 0; --i) {
+		control_segments[0][i] = control_segments[0][i - 1];
+	}
+
+	//Place the control point at the start
+	control_segments[0][0] = p0_prev;
+
+	//Caclulate the new final point to append
+	diff = dx::XMFLOAT3(pn.x - pn_prev.x, pn.y - pn_prev.y, pn.z - pn_prev.z);
+	dx::XMFLOAT3 pn_next(pn.x + diff.x, pn.y + diff.y, pn.z + diff.z);
+
+	//Append the new final point
+	control_segments[0].push_back(pn_next);
+}
+
 float Path::GetNormalizedT(float t) {
 	float normalized_t;
 	if (t <= loop_time) {
@@ -559,7 +689,10 @@ float Path::GetNormalizedT(float t) {
 	return normalized_t;
 }
 
-Path::Path() : subdivision_count(50) {
+Path::Path() : subdivision_count(50), loop(true) {
+}
+
+Path::Path(bool _loop) : subdivision_count(50), loop(_loop) {
 }
 
 Path::Path(int _subdivision_count) : subdivision_count(_subdivision_count) {

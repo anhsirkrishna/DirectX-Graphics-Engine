@@ -7,6 +7,7 @@ public:
 	Quaternion();
 	Quaternion(float s, dx::XMFLOAT3 v);
 	Quaternion(const dx::XMMATRIX& _mat);
+	Quaternion(const dx::XMVECTOR& q);
 	Quaternion Add(const Quaternion& b) const;
 	Quaternion ScalarProduct(const float& c) const;
 	float DotProduct(const Quaternion& b) const;

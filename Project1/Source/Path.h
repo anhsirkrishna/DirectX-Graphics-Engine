@@ -10,6 +10,7 @@ private:
 	static const int k = 8;
 	int subdivision_count;
 	
+	bool loop;
 	/*
 	* A list of control segments.
 	* Each control segment is a list of control points.
@@ -31,8 +32,6 @@ private:
 	//The constant velocity for movement 
 	std::map<float, float> velocity_function;
 	
-	//The time taken for 1 complete loop. Used to normalize t
-	float loop_time = 30.0f;
 	float path_time = 0.0f;
 
 	//max distance returned by the distance function;
@@ -58,20 +57,38 @@ private:
 		dx::XMVECTOR& pi_next, dx::XMVECTOR& pi_next_next);
 
 	/*
+	* Helper function to determine which 4 control points to use 
+	* to calculate the a and b points for Bezier evaluation.
+	* Used when the path consists of a single segment with no loop
+	*/
+	void GetPointsFromIndexNoLoop(
+		unsigned int point_indx, 
+		dx::XMVECTOR& pi_prev, dx::XMVECTOR& pi,
+		dx::XMVECTOR& pi_next, dx::XMVECTOR& pi_next_next);
+
+	/*
 	* Expand the forward difference table using the adaptive approach
 	*/
 	void AdaptiveExpand();
 
+	/*
+	* Append extra points to the start and end of the path if there's no loop
+	* for the bezier function
+	*/
+	void AppendExtraPoints();
+
 public:
 	float constant_velocity = 670.0f;
-
 	float constant_look_ahead_time = 0.2f;
+	//The time taken for 1 complete loop. Used to normalize t
+	float loop_time = 30.0f;
 
 	/*
 	* Converts a T value to the noramlized 0-1 range based on loop_time;
 	*/
 	float GetNormalizedT(float t);
 	Path();
+	Path(bool _loop);
 	Path(int _subdivision_count);
 	
 	//Adds a control point to the list of control points
@@ -89,6 +106,14 @@ public:
 	* Returns: Vector<FLOAT3> - the list of points
 	*/
 	std::vector<dx::XMFLOAT3> GeneratePath();
+
+	/*
+	* Generates a list of points that represents the path in world space.
+	* Constructs the path from the control_points consisting of a single 
+	* segment with no loops.
+	* Returns: Vector<FLOAT3> - the list of points
+	*/
+	std::vector<dx::XMFLOAT3> GenerateUnloopedPath();
 
 	/*
 	* Generates the forward difference table to evalute the distance for the 

@@ -13,25 +13,23 @@
 #include "Path.h"
 #include "Curve.h"
 
+class Project;
+
 class App {
 public:
 	App();
 
 	int Run();
+	Window& GetWindow();
+	FBXLoader& GetSceneLoader();
 private:
 	ImGUIManager imgui;
 	Window window;
 	FBXLoader fbx_loader;
 	void Update();
-	
-	std::vector<std::unique_ptr<class Drawable>> drawables;
-	std::vector<class Box*> boxes;
-	std::unique_ptr<Line> draw_line;
-	std::unique_ptr<Skeleton> draw_skeleton;
-	std::unique_ptr<Mesh> draw_mesh;
-	std::unique_ptr<Animation> animation;
-	std::unique_ptr<Model> draw_model;
-	std::unique_ptr<Curve> draw_path;
+
+	std::vector<Project*> project_list;
+	Project* active_project;
 
 	float speed_factor = 1.0f;
 	Camera cam;
@@ -39,5 +37,6 @@ private:
 	TimerWrap timer;
 	static constexpr size_t nDrawables = 2;
 	void SpawnSimulationWindow() noexcept;
+	void ProjectSelectionMenu() noexcept;
 };
 

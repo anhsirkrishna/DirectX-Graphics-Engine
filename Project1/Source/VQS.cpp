@@ -66,6 +66,18 @@ void VQS::SetQ(const dx::XMFLOAT4& _v) {
 		dx::XMFLOAT3(_v.x, _v.y, _v.z));
 }
 
+const Quaternion& VQS::GetQ() const {
+	return q;
+}
+
+const dx::XMFLOAT3& VQS::GetV() const {
+	return v;
+}
+
+float VQS::GetS() const {
+	return s;
+}
+
 dx::XMMATRIX VQS::toMatrix() const {
 	return dx::XMMatrixAffineTransformation(
 		dx::XMVectorSet(s, s, s, 1.0f),

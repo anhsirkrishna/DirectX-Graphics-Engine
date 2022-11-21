@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <iterator>
 #include "imgui/imgui.h"
+#include "Project_PathAnimation.h"
+#include "Project_IK.h"
 
 int WindowHeight = 720;
 int WindowWidth = 1280;
@@ -19,50 +21,16 @@ App::App() : window(WindowWidth, WindowHeight, TEXT("Direct3D Engine")) {
 	cam.SetControlWindow(&window);
 
 	window.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 2000.0f));
-	DirectX::XMFLOAT4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
-	draw_line = std::make_unique<Line>(window.Gfx(), color);
 
 	fbx_loader.ExtractSceneData();
 	
-	draw_model = std::make_unique<Model>();
-	draw_model->LoadModel(window.Gfx(), &fbx_loader, TEXT("Max_Red_Body_Diffuse.png"));
+	project_list.push_back(new Project_PathAnimation(this));
 
-	std::unique_ptr<Path> animation_path = std::make_unique<Path>();
-	animation_path->AddControlSegment();
-	animation_path->AddControlPoint(dx::XMFLOAT3(-140.0f, 0.0f, 190.0f), 0);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-180.0f, 0.0f, 150.0f), 0);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-200.0f, 0.0f, 110.0f), 0);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-180.0f, 0.0f, 50.0f), 0);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-140.0f, 0.0f, 10.0f), 0);
-
-	animation_path->AddControlSegment();
-	animation_path->AddControlPoint(dx::XMFLOAT3(-100.0f, 0.0f, 50.0f), 1);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-20.0f, 0.0f, -90.0f), 1);
-	animation_path->AddControlPoint(dx::XMFLOAT3(40.0f, 0.0f, -10.0f), 1);
-	animation_path->AddControlPoint(dx::XMFLOAT3(100.0f, 0.0f, -90.0f), 1);
-
-	animation_path->AddControlSegment();
-	animation_path->AddControlPoint(dx::XMFLOAT3(140.0f, 0.0f, -110.0f), 2);
-	animation_path->AddControlPoint(dx::XMFLOAT3(110.0f, 0.0f, 10.0f), 2);
-	animation_path->AddControlPoint(dx::XMFLOAT3(160.0f, 0.0f, 30.0f), 2);
-	animation_path->AddControlPoint(dx::XMFLOAT3(110.0f, 0.0f, 70.0f), 2);
-	animation_path->AddControlPoint(dx::XMFLOAT3(160.0f, 0.0f, 110.0f), 2);
-
-	animation_path->AddControlSegment();
-	animation_path->AddControlPoint(dx::XMFLOAT3(120.0f, 0.0f, 150.0f), 3);
-	animation_path->AddControlPoint(dx::XMFLOAT3(40.0f, 0.0f, 190.0f), 3);
-	animation_path->AddControlPoint(dx::XMFLOAT3(0.0f, 0.0f, 230.0f), 3);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-40.0f, 0.0f, 250.0f), 3);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-80.0f, 0.0f, 270.0f), 3);
-	animation_path->AddControlPoint(dx::XMFLOAT3(-120.0f, 0.0f, 220.0f), 3);
-
-	animation_path->Scale(2.0f, 2.0f, 2.0f);
-
-	draw_path = std::make_unique<Curve>(window.Gfx(), animation_path->GeneratePath());
-	animation_path->GenerateForwardDiffTable();
-	animation_path->GenerateDefaultVelocityFunction();
-
-	draw_model->controller->SetAnimationPath(animation_path.release());
+	project_list.push_back(new Project_IK(this));
+	active_project = project_list.back();
+	
+	for (auto& proj : project_list)
+		proj->Setup();
 }
 
 int App::Run() {
@@ -74,19 +42,25 @@ int App::Run() {
 	}
 }
 
-void App::Update() {
+Window& App::GetWindow() {
+	return window;
+}
 
+FBXLoader& App::GetSceneLoader() {
+	return fbx_loader;
+}
+
+void App::Update() {
 	const auto dt = timer.Mark() * speed_factor;
 	window.Gfx().BeginFrame();
 	
 	cam.Update(dt);
 	window.Gfx().SetCamera(cam.GetMatrix());
 
-	draw_model->Update(window.keyboard.isKeyPressed(VK_SPACE) ? 0.0f : dt);
-	draw_model->Draw(window.Gfx());
+	ProjectSelectionMenu();
 
-	draw_path->Update(dt);
-	draw_path->Draw(window.Gfx());
+	active_project->Update(dt);
+	active_project->Draw();
 
 	SpawnSimulationWindow();
 	cam.SpawnCameraControls();
@@ -108,4 +82,19 @@ void App::SpawnSimulationWindow() noexcept
 			window.Gfx().SetFillMode();
 	}
 	ImGui::End();
+}
+
+/*
+* IMGUI menu to select which project to run
+*/
+void App::ProjectSelectionMenu() noexcept {
+	if (ImGui::BeginMainMenuBar()) {
+		if (ImGui::BeginMenu("Project Selector")) {
+			for (auto& proj : project_list) {
+				if (ImGui::MenuItem(proj->GetName().c_str(), "", active_project == proj)) { active_project = proj; }
+			}
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
 }

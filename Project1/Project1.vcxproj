@@ -45,13 +45,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)stbi\include;$(SolutionDir)FBX\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)FBX\lib\vs2019\x64\debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)armadillo-11.4.2\include;$(SolutionDir)FBX\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)armadillo-11.4.2\lib_win64;$(SolutionDir)FBX\lib\vs2019\x64\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)FBX\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)FBX\lib\vs2019\x64\debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)armadillo-11.4.2\include;$(SolutionDir)FBX\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)armadillo-11.4.2\lib_win64;$(SolutionDir)FBX\lib\vs2019\x64\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -65,7 +65,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libfbxsdk.lib;zlib-md.lib;D3DCompiler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libopenblas.lib;libfbxsdk.lib;libfbxsdk-md.lib;zlib-md.lib;D3DCompiler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -78,16 +78,22 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libfbxsdk.lib;libfbxsdk-md.lib;zlib-md.lib;D3DCompiler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libopenblas.lib;libfbxsdk.lib;libfbxsdk-md.lib;zlib-md.lib;D3DCompiler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\IKinematics.cpp" />
+    <ClCompile Include="Source\Project.cpp" />
+    <ClCompile Include="Source\Project_IK.cpp" />
+    <ClCompile Include="Source\Project_PathAnimation.cpp" />
     <ClCompile Include="Source\Sampler.cpp" />
     <ClCompile Include="Source\DynamicVertexBuffer.cpp" />
     <ClCompile Include="Source\Curve.cpp" />
@@ -132,8 +138,13 @@
     <ClCompile Include="Source\VQS.cpp" />
     <ClCompile Include="Source\Texture.cpp" />
     <ClCompile Include="Source\WICTextureLoader.cpp" />
+    <ClCompile Include="Source\SolidSphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\IKinematics.h" />
+    <ClInclude Include="Source\Project_IK.h" />
+    <ClInclude Include="Source\Project_PathAnimation.h" />
+    <ClInclude Include="Source\Project.h" />
     <ClInclude Include="Source\Sampler.h" />
     <ClInclude Include="Source\DynamicVertexBuffer.h" />
     <ClInclude Include="Source\Curve.h" />
@@ -187,6 +198,8 @@
     <ClInclude Include="Source\FBXUtil.h" />
     <ClInclude Include="Source\Texture.h" />
     <ClInclude Include="Source\WICTextureLoader.h" />
+    <ClInclude Include="Source\SolidSphere.h" />
+    <ClInclude Include="Source\Sphere.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Source\CurvePS.hlsl">

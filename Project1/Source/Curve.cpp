@@ -26,9 +26,6 @@ Curve::Curve(Graphics& gfx, const std::vector<dx::XMFLOAT3>& curve_points) {
 		
 		AddStaticBind(std::make_unique<Topology>(gfx, D3D11_PRIMITIVE_TOPOLOGY_LINELIST));
 	}
-	else {
-		SetIndexFromStatic();
-	}
 
 	std::vector<int> vertex_indices;
 	

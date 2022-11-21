@@ -10,7 +10,7 @@ Skeleton::~Skeleton()
 	}
 }
 
-void Skeleton::ConvertFromFbx(FBXSkeleton* _skele) {
+void Skeleton::ConvertFromFbx(const FBXSkeleton* _skele) {
 	dx::XMFLOAT3 _translation; 
 	dx::XMFLOAT4 _rotation;
 	dx::XMFLOAT3 _inv_translation;
@@ -58,6 +58,17 @@ void Skeleton::Initialize() {
 
 		if (bone->parent_indx != -1)
 			((hierarchy[bone->parent_indx])->children).push_back(bone);
+
+	}
+
+	//Collect the end effectors
+	for (unsigned int i = 0; i < hierarchy.size(); ++i)
+	{
+		Bone* bone = hierarchy[i];
+
+		if (bone->children.size() == 0)
+			end_effectors.push_back(bone);
+
 	}
 }
 
@@ -100,6 +111,18 @@ void Skeleton::ProcessBindPose(std::vector<dx::XMMATRIX>& buffer) {
 	}
 }
 
+void Skeleton::ProcessBaseAnimationGraph(std::vector<dx::XMMATRIX>& matrix_buffer, Animation& anim) {
+	for (unsigned int boneIndex = 0; boneIndex < hierarchy.size(); ++boneIndex)
+	{
+		Bone* bone = hierarchy[boneIndex];
+		const VQS& animation_transform = anim.GetBaseTransform(boneIndex);
+		dx::XMMATRIX parent_transform = bone->parent_indx != -1 ? matrix_buffer[bone->parent_indx] : dx::XMMatrixIdentity();
+		dx::XMMATRIX local_transform = animation_transform.toMatrix();
+		dx::XMMATRIX modelTransform = local_transform * parent_transform;
+		matrix_buffer[boneIndex] = modelTransform;
+	}
+}
+
 Bone::Bone(int _indx, int _parent_indx, const VQS& _bind_transform, const VQS& _inv_bind_transform)
 	: bone_indx(_indx), parent_indx(_parent_indx), bind_transform(_bind_transform), 
 	  inv_bind_transform(_inv_bind_transform) {
@@ -110,7 +133,9 @@ Bone::Bone(int _indx, int _parent_indx, const VQS& _bind_transform, const VQS& _
 /// Methods for  the animation controller
 
 AnimationController::AnimationController() : 
-	animation_time(0.0f), animation_speed(1.0f), skeleton(nullptr), active_animation(nullptr) {
+	animation_time(0.0f), animation_speed(1.0f), skeleton(nullptr), 
+	active_animation(nullptr), animation_blending(false), animation_run_threshold(0.0f),
+	next_animation(nullptr) {
 }
 
 AnimationController::~AnimationController() {
@@ -166,11 +191,11 @@ void AnimationController::ClearTrackData() {
 void AnimationController::Process() {
 	//Check if we are switching between two animations
 	if (animation_blending && animation_blending_enabled) {
-		float noramlized_velo = animation_path->GetCurrentVelocity()/animation_path->constant_velocity;
+		float noramlized_velo = animation_path->GetCurrentVelocity() / animation_path->constant_velocity;
 		//Blend between the two if we are
-		bool blend_complete = 
-			skeleton->ProcessBlendAnimationGraph(animation_time, bone_matrix_buffer, 
-				*active_animation, *next_animation, 
+		bool blend_complete =
+			skeleton->ProcessBlendAnimationGraph(animation_time, bone_matrix_buffer,
+				*active_animation, *next_animation,
 				animation_track_data, next_animation_track_data, noramlized_velo);
 		//Check if blending is complete
 		if (blend_complete) {
@@ -182,27 +207,38 @@ void AnimationController::Process() {
 
 	}
 	else {
-		skeleton->ProcessAnimationGraph(animation_time, bone_matrix_buffer, 
+		skeleton->ProcessAnimationGraph(animation_time, bone_matrix_buffer,
 			*active_animation, animation_track_data);
 	}
-	
 }
 
 void AnimationController::ProcessBindPose() {
 	skeleton->ProcessBindPose(bone_matrix_buffer);
 }
 
-void AnimationController::SetSkel(Skeleton* skel) {
-	skeleton.reset(skel);
+void AnimationController::SetSkel(const FBXSkeleton& fbx_skele) {
+	skeleton = std::make_unique<Skeleton>();
+	skeleton->ConvertFromFbx(&fbx_skele);
+	skeleton->Initialize();
 	bone_matrix_buffer.resize(skeleton->hierarchy.size());
 	animation_track_data.resize(skeleton->hierarchy.size());
 	next_animation_track_data.resize(skeleton->hierarchy.size());
 	ClearTrackData();
 }
 
-void AnimationController::AddAnimation(Animation* anim) {
-	active_animation = anim;
-	animations.push_back(anim);
+const Skeleton& AnimationController::GetSkel() const {
+	return *skeleton.get();
+}
+
+Skeleton* AnimationController::GetSkelP() const {
+	return skeleton.get();
+}
+
+void AnimationController::AddAnimation(const FBXAnimation& anim) {
+	Animation* new_anim = new Animation();
+	new_anim->ConvertFromFbx(&anim);
+	animations.push_back(new_anim);
+	active_animation = new_anim;
 }
 
 void AnimationController::SetAnimationPath(Path* path) {
@@ -236,11 +272,16 @@ void AnimationController::SwitchAnimation(unsigned int animation_index) {
 }
 
 void AnimationController::ShowPathControls() {
-	if (ImGui::Begin("Animtion Path"))
+	if (ImGui::Begin("Animation Path"))
 	{
 		float curr_time = animation_path->GetCurrentPathTime();
 		float norm_distance = animation_path->GetSinDistanceFromTime(curr_time);
 		float curr_distance = norm_distance * animation_path->GetDistance(1);
+		dx::XMVECTOR curr_pos = animation_path->GetCurrentPosition();
+		ImGui::Text("Position : X-%f Y-%f Z%f", 
+			dx::XMVectorGetX(curr_pos), 
+			dx::XMVectorGetY(curr_pos), 
+			dx::XMVectorGetZ(curr_pos));
 		ImGui::Text("Distance : %f", curr_distance);
 		float curr_u = animation_path->GetU(curr_distance);
 		ImGui::Text("Inverse Distance : %f", curr_u);
@@ -257,6 +298,9 @@ void AnimationController::ShowPathControls() {
 		}
 
 		ImGui::SliderFloat("Look ahead time", &animation_path->constant_look_ahead_time, 0.0f, 12.0f, "%.4f");
+
+		ImGui::SliderFloat("Loop Time", &animation_path->loop_time,
+			0.0f, 60, "%.4f");
 	}
 	ImGui::End();
 }
@@ -318,6 +362,11 @@ void Animation::CalculateTransform(float animTime, int trackIndex, VQS& animatio
 
 	//Remember the last keyframe
 	data.last_key = curr_key;
+}
+
+const VQS& Animation::GetBaseTransform(int bone_index) {
+	Track& curr_path = tracks[bone_index];
+	return curr_path.key_frames[0].transform;
 }
 
 bool Animation::CalculateBlendTransform(float animTime, int trackIndex, 
@@ -388,7 +437,7 @@ bool Animation::CalculateBlendTransform(float animTime, int trackIndex,
 	return blend_completed;
 }
 
-void Animation::ConvertFromFbx(FBXAnimation* fbx_animation) {
+void Animation::ConvertFromFbx(const FBXAnimation* fbx_animation) {
 	duration = fbx_animation->duration.GetSecondDouble();
 	KeyFrame new_key_frame;
 	int frame_count = 0;

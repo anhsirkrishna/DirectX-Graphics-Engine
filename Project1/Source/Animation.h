@@ -50,6 +50,8 @@ public:
 	//Calculate the transform for the skeleton for a given animation_time and bone_index
 	void CalculateTransform(float animTime, int trackIndex, VQS& animation_transform, TrackData& data);
 	
+	const VQS& GetBaseTransform(int bone_index);
+
 	/*
 	* Calculate the transform by blending between two different animations
 	* Returns: bool - True if the blending has finished
@@ -58,7 +60,7 @@ public:
 								 VQS& animation_transform, TrackData& data, TrackData& next_data,
 								 float normalized_velo);
 	
-	void ConvertFromFbx(FBXAnimation* fbx_animation);
+	void ConvertFromFbx(const FBXAnimation* fbx_animation);
 
 	float duration;
 	std::vector<Track> tracks;
@@ -68,7 +70,7 @@ public:
 class Skeleton {
 public:
 	~Skeleton();
-	void ConvertFromFbx(FBXSkeleton* _skele);
+	void ConvertFromFbx(const FBXSkeleton* _skele);
 	void Initialize();
 	void ProcessAnimationGraph(float time, std::vector<dx::XMMATRIX>& matrix_buffer,
 		Animation& anim, std::vector<TrackData>& track_buffer);
@@ -77,8 +79,11 @@ public:
 			std::vector<TrackData>& track_buffer, std::vector<TrackData>& next_track_buffer,
 			float normalized_velo);
 	void ProcessBindPose(std::vector<dx::XMMATRIX>& buffer);
+	void ProcessBaseAnimationGraph(std::vector<dx::XMMATRIX>& matrix_buffer,
+		Animation& anim);
 
 	std::vector<Bone*> hierarchy;
+	std::vector<Bone*> end_effectors;
 };
 
 //Controls the animation for a animated model by tracking time and
@@ -114,8 +119,10 @@ public:
 	void ClearTrackData();
 	void Process();
 	void ProcessBindPose();
-	void SetSkel(Skeleton* skel);
-	void AddAnimation(Animation* anim);
+	void SetSkel(const FBXSkeleton& skel);
+	const Skeleton& GetSkel() const;
+	Skeleton* GetSkelP() const;
+	void AddAnimation(const FBXAnimation& anim);
 	void SetAnimationPath(Path* path);
 	void SetActiveAnimation(unsigned int animation_index);
 	void SwitchAnimation(unsigned int animation_index);
