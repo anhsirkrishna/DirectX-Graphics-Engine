@@ -62,7 +62,7 @@ void IKController::AddManipulatorForEE(Bone* _end_effector) {
     }
 
     //Get the root transform
-    dx::XMMATRIX parent_transform = dx::XMMatrixIdentity();
+    dx::XMMATRIX parent_transform = p_base_animation->GetBaseTransform(0).toMatrix();
     for (auto iter = parent_indeces.rbegin(); iter != parent_indeces.rend(); ++iter) {
         Joint curr_joint;
         //Get the current bone
@@ -93,29 +93,36 @@ void IKController::AddManipulatorForEE(Bone* _end_effector) {
 void IKController::ProcessManipulators(float dt) {
     if (current_frame == 0)
         return;
+
     for (unsigned int i = 0; i < manipulators.size(); ++i) {
         dx::XMVECTOR Pc = EvalulateManipulator(i);
         dx::XMVECTOR diff_vector = dx::XMVectorSubtract(target_position, Pc);
         float distance_check = dx::XMVectorGetX(dx::XMVector3Length(diff_vector));
         if (distance_check < distance_threshold)
             continue;
-        //dP = (P - Pc) / CF
-        dx::XMVECTOR dP = dx::XMVectorScale(
-            diff_vector,
-            1.0f / current_frame
-        );
 
-        arma::mat pseudo_J = GetPesudoJacobian(i);
-        arma::mat dP_mat(3, 1);
-        dP_mat(0) = dx::XMVectorGetX(dP);
-        dP_mat(1) = dx::XMVectorGetY(dP);
-        dP_mat(2) = dx::XMVectorGetZ(dP);
-        arma::mat dQ = pseudo_J * dP_mat;
+        if (jacobian) {
+            //dP = (P - Pc) / CF
+            dx::XMVECTOR dP = dx::XMVectorScale(
+                diff_vector,
+                1.0f / current_frame
+            );
 
-        for (unsigned int j = 0; j < manipulators[i].size(); ++j) {
-            manipulators[i][j].rot_angle += (dQ(j) * dt);
+            arma::mat pseudo_J = GetPesudoJacobian(i);
+            arma::mat dP_mat(3, 1);
+            dP_mat(0) = dx::XMVectorGetX(dP);
+            dP_mat(1) = dx::XMVectorGetY(dP);
+            dP_mat(2) = dx::XMVectorGetZ(dP);
+            arma::mat dQ = pseudo_J * dP_mat;
+
+            for (unsigned int j = 0; j < manipulators[i].size(); ++j) {
+                manipulators[i][j].rot_angle += (dQ(j) * dt);
+            }
+            SetManipulatorConstraits(i);
         }
-        SetManipulatorConstraits(i);
+        else {
+            ProcessCCD(i);
+        }
     }
     current_frame--;
 }
@@ -185,13 +192,13 @@ void IKController::ShowIKControls() {
 }
 
 dx::XMVECTOR IKController::EvalulateManipulator(unsigned int manipulator_indx) {
-    /*dx::XMMATRIX modelTransform = bone_matrix_buffer[end_effectors[manipulator_indx]->bone_indx];
-    dx::XMVECTOR origin = dx::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);*/
-    return manipulators[manipulator_indx].back().position;
-    /*return dx::XMVector3Transform(origin, 
+    dx::XMMATRIX modelTransform = bone_matrix_buffer[end_effectors[manipulator_indx]->bone_indx];
+    dx::XMVECTOR origin = dx::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+    //return manipulators[manipulator_indx].back().position;
+    return dx::XMVector3Transform(origin, 
         modelTransform * 
-dx::XMMatrixMultiply(base_model_rotation,
-            dx::XMMatrixTranslationFromVector(base_model_position)));*/
+        dx::XMMatrixMultiply(base_model_rotation,
+            dx::XMMatrixTranslationFromVector(base_model_position)));
 }
 
 arma::mat IKController::GetPesudoJacobian(unsigned int manipulator_indx) {
@@ -241,6 +248,24 @@ void IKController::SetManipulatorConstraits(unsigned int manipulator_indx) {
     for (auto& joint : manipulators[manipulator_indx]) {
         joint.rot_angle = joint.rot_angle < joint.min_angle ? joint.min_angle : joint.rot_angle;
         joint.rot_angle = joint.rot_angle > joint.max_angle ? joint.max_angle : joint.rot_angle;
+    }
+}
+
+void IKController::ProcessCCD(unsigned int manipulator_indx) {
+    dx::XMVECTOR Pc = EvalulateManipulator(manipulator_indx);
+    for (int k = manipulators[manipulator_indx].size() - 2; k >= 0; --k) {
+        dx::XMVECTOR Vck =  
+            dx::XMVectorSubtract(Pc, manipulators[manipulator_indx][k].position);
+        dx::XMVECTOR Vdk =
+            dx::XMVectorSubtract(target_position, manipulators[manipulator_indx][k].position);
+        float alpha_k = dx::XMScalarACos(
+            dx::XMVectorGetX(dx::XMVector3Dot(Vck, Vdk)) /
+            (dx::XMVectorGetX(dx::XMVector3Length(Vck)) * dx::XMVectorGetX(dx::XMVector3Length(Vdk)))
+        );
+        for (unsigned int j = k; j < manipulators[manipulator_indx].size(); ++j) {
+            manipulators[manipulator_indx][j].rot_angle += alpha_k;
+        }
+        SetManipulatorConstraits(manipulator_indx);
     }
 }
 

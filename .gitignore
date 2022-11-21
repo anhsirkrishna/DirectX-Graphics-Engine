@@ -60,3 +60,6 @@ assimp
 #FBX
 FBX
 *.fbx
+
+#armadillo
+armadillo-11.4.2

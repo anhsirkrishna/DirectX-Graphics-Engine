@@ -22,6 +22,8 @@ public:
 	//Update the Controller
 	void Update(float dt, dx::XMVECTOR _model_pos, dx::XMMATRIX _model_rot);
 	
+	//Method to use for IK
+	bool jacobian = false;
 
 	dx::XMVECTOR base_model_position;
 	dx::XMMATRIX base_model_rotation;
@@ -29,7 +31,7 @@ public:
 	//Animation control parameters
 	float animation_time;
 	float animation_speed;
-	int frame_count = 120*10;
+	int frame_count = 120*5;
 	unsigned int current_frame = frame_count;
 
 	//Pointer to the skeleton
@@ -107,4 +109,9 @@ public:
 	* on the min/max values
 	*/
 	void SetManipulatorConstraits(unsigned int manipulator_indx);
+
+	/*
+	* Process the manipulator with CCD instead of jacobian
+	*/
+	void ProcessCCD(unsigned int manipulator_indx);
 };
