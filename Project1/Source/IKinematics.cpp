@@ -74,7 +74,10 @@ void IKController::AddManipulatorForEE(Bone* _end_effector) {
         dx::XMMATRIX modelTransform = local_transform * parent_transform;
 
         //Get the position by applying the transform
-        curr_joint.position = dx::XMVector3Transform(origin, modelTransform);
+        curr_joint.position = dx::XMVector3Transform(origin,
+            modelTransform *
+            dx::XMMatrixMultiply(base_model_rotation,
+                dx::XMMatrixTranslationFromVector(base_model_position)));
         //Get the rotation axis
         dx::XMQuaternionToAxisAngle(
             &curr_joint.rot_axis, &curr_joint.rot_angle, curr_vqs.GetQ().toVector());
@@ -91,7 +94,7 @@ void IKController::AddManipulatorForEE(Bone* _end_effector) {
 }
 
 void IKController::ProcessManipulators(float dt) {
-    if (current_frame == 0)
+    if (stop_animation)
         return;
 
     for (unsigned int i = 0; i < manipulators.size(); ++i) {
@@ -102,11 +105,7 @@ void IKController::ProcessManipulators(float dt) {
             continue;
 
         if (jacobian) {
-            //dP = (P - Pc) / CF
-            dx::XMVECTOR dP = dx::XMVectorScale(
-                diff_vector,
-                1.0f / current_frame
-            );
+            dx::XMVECTOR dP = diff_vector;
 
             arma::mat pseudo_J = GetPesudoJacobian(i);
             arma::mat dP_mat(3, 1);
@@ -115,10 +114,9 @@ void IKController::ProcessManipulators(float dt) {
             dP_mat(2) = dx::XMVectorGetZ(dP);
             arma::mat dQ = pseudo_J * dP_mat;
 
-            for (unsigned int j = 0; j < manipulators[i].size(); ++j) {
-                manipulators[i][j].rot_angle += (dQ(j) * dt);
+            for (unsigned int j = 0; j < manipulators[i].size() - 1; ++j) {
+                manipulators[i][j].rot_angle += (dQ(j, 0) * dt);
             }
-            SetManipulatorConstraits(i);
         }
         else {
             ProcessCCD(i);
@@ -151,6 +149,11 @@ void IKController::ProcessAnimation() {
                 modelTransform *
                 dx::XMMatrixMultiply(base_model_rotation,
                 dx::XMMatrixTranslationFromVector(base_model_position)));
+            joint_p->curr_rot_axis = dx::XMVector3Normalize(
+                dx::XMVector3Transform(joint_p->rot_axis,
+                    base_model_rotation));/*
+                dx::XMMatrixMultiply(base_model_rotation,
+                    dx::XMMatrixTranslationFromVector(base_model_position))));*/
         }
     }
 }
@@ -159,6 +162,8 @@ void IKController::ShowIKControls() {
     int bone_index;
     if (ImGui::Begin("IK Controller")) 
     {
+        ImGui::Checkbox("Stop animation", &stop_animation);
+
         ImGui::Text("Manipulator joint angles");
         for(unsigned int i = 0; i < manipulators.size(); ++i)
         {
@@ -166,6 +171,16 @@ void IKController::ShowIKControls() {
             {
                 std::string str = "Bone angle indx " + std::to_string(manipulators[i][j].bone_index);
                 ImGui::SliderAngle(str.c_str() , &manipulators[i][j].rot_angle);
+
+                ImGui::Text("Joint bone indx : %d", manipulators[i][j].bone_index);
+                ImGui::Text("Joint rot_axis : X - %f | Y - %f | Z - %f", 
+                    dx::XMVectorGetX(manipulators[i][j].curr_rot_axis),
+                    dx::XMVectorGetY(manipulators[i][j].curr_rot_axis),
+                    dx::XMVectorGetZ(manipulators[i][j].curr_rot_axis));
+                ImGui::Text("Joint position : X - %f | Y - %f | Z - %f",
+                    dx::XMVectorGetX(manipulators[i][j].position),
+                    dx::XMVectorGetY(manipulators[i][j].position),
+                    dx::XMVectorGetZ(manipulators[i][j].position));
             }
         }
 
@@ -203,11 +218,12 @@ dx::XMVECTOR IKController::EvalulateManipulator(unsigned int manipulator_indx) {
 
 arma::mat IKController::GetPesudoJacobian(unsigned int manipulator_indx) {
     int joint_n = manipulators[manipulator_indx].size();
+    joint_n -= 1;
     arma::mat J(3, joint_n);
 
     dx::XMVECTOR ee_position = EvalulateManipulator(manipulator_indx);
     for (unsigned int i = 0; i < joint_n; ++i) {
-        dx::XMVECTOR curr_rot_axis = manipulators[manipulator_indx][i].rot_axis;
+        dx::XMVECTOR curr_rot_axis = manipulators[manipulator_indx][i].curr_rot_axis;
         dx::XMVECTOR curr_position = manipulators[manipulator_indx][i].position;
         dx::XMVECTOR mat_val = dx::XMVector3Cross(curr_rot_axis,
             dx::XMVectorSubtract(ee_position, curr_position));
@@ -266,6 +282,33 @@ void IKController::ProcessCCD(unsigned int manipulator_indx) {
             manipulators[manipulator_indx][j].rot_angle += alpha_k;
         }
         SetManipulatorConstraits(manipulator_indx);
+    }
+}
+
+void IKController::Reset() {
+    current_frame = 0;
+    dx::XMVECTOR origin = dx::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+    for (unsigned int i = 0; i < manipulators.size(); ++i) {
+        //Get the root transform
+        dx::XMMATRIX parent_transform = p_base_animation->GetBaseTransform(0).toMatrix();
+        for (unsigned int j = 0; j < manipulators[i].size(); ++j) {
+            Joint& curr_joint = manipulators[i][j];
+            const VQS& curr_vqs = p_base_animation->GetBaseTransform(curr_joint.bone_index);
+            dx::XMMATRIX local_transform = curr_vqs.toMatrix();
+            dx::XMMATRIX modelTransform = local_transform * parent_transform;
+
+            //Get the position by applying the transform
+            curr_joint.position = dx::XMVector3Transform(origin,
+                modelTransform *
+                dx::XMMatrixMultiply(base_model_rotation,
+                    dx::XMMatrixTranslationFromVector(base_model_position)));
+            //Get the rotation axis
+            dx::XMQuaternionToAxisAngle(
+                &curr_joint.rot_axis, &curr_joint.rot_angle, curr_vqs.GetQ().toVector());
+
+            //The parent_transform for the next iteration is the current model_transform
+            parent_transform = modelTransform;
+        }
     }
 }
 

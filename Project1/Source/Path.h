@@ -91,8 +91,22 @@ public:
 	Path(bool _loop);
 	Path(int _subdivision_count);
 	
+	/*
+	* Resets the path time
+	*/
+	void Reset();
+
 	//Adds a control point to the list of control points
 	void AddControlPoint(const dx::XMFLOAT3& new_point, unsigned int segment);
+
+	//Removes the last control point in the list of control points
+	void PopControlPoint(unsigned int segment);
+
+	/*
+	* Replaces the last point in the segment, 
+	* accounting for the appended extra points.
+	*/
+	void ReplaceLastPoint(const dx::XMFLOAT3& new_point, unsigned int segment);
 
 	//Adds an empty control segment to the list of control segments
 	void AddControlSegment();

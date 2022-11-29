@@ -16,8 +16,47 @@ static float lerp(float a, float b, float t) {
 	return (t * a) + ((1 - t) * b);
 }
 
+/*
+* Resets the path time
+*/
+void Path::Reset() {
+	path_time = 0;
+}
+
 void Path::AddControlPoint(const dx::XMFLOAT3& new_point, unsigned int segment) {
 	control_segments[segment].push_back(new_point);
+}
+
+void Path::PopControlPoint(unsigned int segment) {
+	control_segments[segment].pop_back();
+}
+
+/*
+* Replaces the last point in the segment,
+* accounting for the appended extra points.
+*/
+void Path::ReplaceLastPoint(const dx::XMFLOAT3& new_point, unsigned int segment) {
+	unsigned int segment_size = control_segments[segment].size();
+	if (loop)
+		control_segments[segment][segment_size - 1] = new_point;
+	else {
+		//Pop the extra appended point and the last point
+		control_segments[segment].pop_back();
+		control_segments[segment].pop_back();
+
+		//Add the new last point
+		dx::XMFLOAT3 pn_prev = control_segments[segment].back();
+		control_segments[segment].push_back(new_point);
+
+		dx::XMFLOAT3 pn = new_point;
+
+		//Caclulate the new final point to append
+		dx::XMFLOAT3 diff(pn.x - pn_prev.x, pn.y - pn_prev.y, pn.z - pn_prev.z);
+		dx::XMFLOAT3 pn_next(pn.x + diff.x, pn.y + diff.y, pn.z + diff.z);
+
+		//Append the new final point
+		control_segments[segment].push_back(pn_next);
+	}
 }
 
 void Path::AddControlSegment() {

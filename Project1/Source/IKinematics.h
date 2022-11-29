@@ -9,6 +9,7 @@ public:
 	struct Joint {
 		dx::XMVECTOR position;
 		dx::XMVECTOR rot_axis;
+		dx::XMVECTOR curr_rot_axis;
 		int bone_index;
 		float rot_angle;
 		float max_angle;
@@ -23,15 +24,16 @@ public:
 	void Update(float dt, dx::XMVECTOR _model_pos, dx::XMMATRIX _model_rot);
 	
 	//Method to use for IK
-	bool jacobian = false;
+	bool jacobian = true;
 
 	dx::XMVECTOR base_model_position;
 	dx::XMMATRIX base_model_rotation;
 
 	//Animation control parameters
+	bool stop_animation = false;
 	float animation_time;
 	float animation_speed;
-	int frame_count = 120*5;
+	int frame_count = 120*10;
 	unsigned int current_frame = frame_count;
 
 	//Pointer to the skeleton
@@ -50,7 +52,7 @@ public:
 	//the target position;
 	dx::XMVECTOR target_position;
 	//The threshold to check if the EE is close enough to the target_position
-	float distance_threshold = 15.0f;
+	float distance_threshold = 3.0f;
 
 	//Process the animation
 	void Process(float dt);
@@ -114,4 +116,9 @@ public:
 	* Process the manipulator with CCD instead of jacobian
 	*/
 	void ProcessCCD(unsigned int manipulator_indx);
+
+	/*
+	* Reset the joint angles to the base animation angles
+	*/
+	void Reset();
 };

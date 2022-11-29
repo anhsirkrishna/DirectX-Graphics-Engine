@@ -43,6 +43,6 @@ inline void DynamicVertexBuffer::Update(Graphics& gfx, const std::vector<V>& ver
 		D3D11_MAP_WRITE_DISCARD, 0u,
 		&msr
 	);
-	memcpy(msr.pData, vertices.data(), sizeof(vertices) * stride);
+	memcpy(msr.pData, vertices.data(), vertices.size() * stride);
 	GetContext(gfx)->Unmap(pVertexBuffer.Get(), 0u);
 }
