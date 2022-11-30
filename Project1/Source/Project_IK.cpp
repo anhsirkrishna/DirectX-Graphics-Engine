@@ -73,7 +73,7 @@ void Project_IK::Update(float dt) {
 		draw_model->ik_controller->target_position = dx::XMLoadFloat3(&sphere_pos);
 	}
 	else {
-		if (ik_mode) {
+		if (draw_model->ik_mode) {
 			draw_model->ik_mode = false;
 			draw_model->ik_controller->Reset();
 		}

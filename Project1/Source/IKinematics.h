@@ -1,4 +1,6 @@
 #pragma once
+#undef snprintf
+
 #include <armadillo>
 #include "Quaternion.h"
 #include "Animation.h"

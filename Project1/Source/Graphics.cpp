@@ -108,7 +108,7 @@ Graphics::Graphics(HWND hWnd, int width, int height)
 	pContext->RSSetViewports(1u, &vp);
 
 	InitRenderStates();
-
+	
 	// init imgui d3d impl
 	ImGui_ImplDX11_Init(pDevice.Get(), pContext.Get());
 }
