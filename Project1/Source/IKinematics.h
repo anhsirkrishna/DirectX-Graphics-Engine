@@ -16,6 +16,8 @@ public:
 		float rot_angle;
 		float max_angle;
 		float min_angle;
+		float final_angle;
+		float flexibility;
 	};
 
 	Joint* GetJoint(int manipulator_index, int bone_index);
@@ -27,6 +29,10 @@ public:
 	
 	//Method to use for IK
 	bool jacobian = true;
+	//Variable to apply constraints to the transformations
+	bool apply_constraints = true;
+	//Variable to scale the weights
+	float weight_factor = 1.0f;
 
 	dx::XMVECTOR base_model_position;
 	dx::XMMATRIX base_model_rotation;
@@ -97,10 +103,16 @@ public:
 	dx::XMVECTOR EvalulateManipulator(unsigned int manipulator_indx);
 
 	/*
-	* Calculate the PseudoJacobian Matrix for the corresponding manipulator
+	* Calculate the Jacobian Matrix for the corresponding manipulator
+	* Returns: Matrix
+	*/
+	arma::mat GetJacobian(unsigned int manipulator_indx);
+
+	/*
+	* Calculate the PseudoJacobian Matrix for the Jacobian
 	* Returns: Matrix 
 	*/
-	arma::mat GetPesudoJacobian(unsigned int manipulator_indx);
+	arma::mat GetPesudoJacobian(arma::mat Jacobian);
 
 	/*
 	* Generates the constraints based on pre-defined values considered
@@ -123,4 +135,10 @@ public:
 	* Reset the joint angles to the base animation angles
 	*/
 	void Reset();
+
+	/*
+	* Get the weight vector used to apply constraints
+	* Returns: Matrix (column vector)
+	*/
+	arma::mat GenerateConstrainedWeights(unsigned int manipulator_indx);
 };

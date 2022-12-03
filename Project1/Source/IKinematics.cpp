@@ -106,13 +106,25 @@ void IKController::ProcessManipulators(float dt) {
 
         if (jacobian) {
             dx::XMVECTOR dP = diff_vector;
-
-            arma::mat pseudo_J = GetPesudoJacobian(i);
+            arma::mat J = GetJacobian(i);
+            arma::mat pseudo_J = GetPesudoJacobian(J);
             arma::mat dP_mat(3, 1);
             dP_mat(0) = dx::XMVectorGetX(dP);
             dP_mat(1) = dx::XMVectorGetY(dP);
             dP_mat(2) = dx::XMVectorGetZ(dP);
-            arma::mat dQ = pseudo_J * dP_mat;
+            arma::mat dQ;
+            arma::mat dQ_uc = pseudo_J * dP_mat;
+
+            if (apply_constraints) {
+                arma::mat w = GenerateConstrainedWeights(i);
+                arma::mat Jw = J * w;
+                arma::mat dP_mat_w = (dP_mat + Jw);
+                
+                dQ = (pseudo_J * dP_mat_w) - (pseudo_J * Jw);
+            }
+            else {
+                dQ = dQ_uc;
+            }
 
             for (unsigned int j = 0; j < manipulators[i].size() - 1; ++j) {
                 manipulators[i][j].rot_angle += (dQ(j, 0) * dt);
@@ -151,9 +163,7 @@ void IKController::ProcessAnimation() {
                 dx::XMMatrixTranslationFromVector(base_model_position)));
             joint_p->curr_rot_axis = dx::XMVector3Normalize(
                 dx::XMVector3Transform(joint_p->rot_axis,
-                    base_model_rotation));/*
-                dx::XMMatrixMultiply(base_model_rotation,
-                    dx::XMMatrixTranslationFromVector(base_model_position))));*/
+                    base_model_rotation));
         }
     }
 }
@@ -163,31 +173,16 @@ void IKController::ShowIKControls() {
     if (ImGui::Begin("IK Controller")) 
     {
         ImGui::Checkbox("Stop animation", &stop_animation);
+        ImGui::Checkbox("Apply constraints", &apply_constraints);
 
-        ImGui::Text("Manipulator joint angles");
-        for(unsigned int i = 0; i < manipulators.size(); ++i)
+        ImGui::SliderFloat("Weight factor", &weight_factor, 0.0f, 10.0f);
+        for (unsigned int i = 0; i < manipulators.size(); ++i)
         {
-            for(unsigned int j = 0; j < manipulators[0].size(); ++j)
+            for (unsigned int j = 0; j < manipulators[0].size(); ++j)
             {
-                std::string str = "Bone angle indx " + std::to_string(manipulators[i][j].bone_index);
-                ImGui::SliderAngle(str.c_str() , &manipulators[i][j].rot_angle);
-
-                ImGui::Text("Joint bone indx : %d", manipulators[i][j].bone_index);
-                ImGui::Text("Joint rot_axis : X - %f | Y - %f | Z - %f", 
-                    dx::XMVectorGetX(manipulators[i][j].curr_rot_axis),
-                    dx::XMVectorGetY(manipulators[i][j].curr_rot_axis),
-                    dx::XMVectorGetZ(manipulators[i][j].curr_rot_axis));
-                ImGui::Text("Joint position : X - %f | Y - %f | Z - %f",
-                    dx::XMVectorGetX(manipulators[i][j].position),
-                    dx::XMVectorGetY(manipulators[i][j].position),
-                    dx::XMVectorGetZ(manipulators[i][j].position));
+                std::string str = "Flexibility for Joint " + std::to_string(j);
+                ImGui::SliderFloat(str.c_str(), &manipulators[i][j].flexibility, 0.00001f, 1.0f);
             }
-        }
-
-        ImGui::SliderInt("Max Frame count", &frame_count, 10, 6000);
-        ImGui::Text("Current Frame count %d", current_frame);
-        if (ImGui::Button("Reset CF")) {
-            current_frame = frame_count;
         }
 
         ImGui::SliderFloat("Distance Threshold", &distance_threshold, 0.0f, 300.0f);
@@ -216,7 +211,7 @@ dx::XMVECTOR IKController::EvalulateManipulator(unsigned int manipulator_indx) {
             dx::XMMatrixTranslationFromVector(base_model_position)));
 }
 
-arma::mat IKController::GetPesudoJacobian(unsigned int manipulator_indx) {
+arma::mat IKController::GetJacobian(unsigned int manipulator_indx) {
     int joint_n = manipulators[manipulator_indx].size();
     joint_n -= 1;
     arma::mat J(3, joint_n);
@@ -233,31 +228,51 @@ arma::mat IKController::GetPesudoJacobian(unsigned int manipulator_indx) {
         J(2, i) = dx::XMVectorGetZ(mat_val);
     }
 
-    arma::mat J_T = J.t();
-    arma::mat J_T_p = J * J_T;
+    return J;
+}
+
+arma::mat IKController::GetPesudoJacobian(arma::mat jacobian) {
+    arma::mat J_T = jacobian.t();
+    arma::mat J_T_p = jacobian * J_T;
     return J_T * J_T_p.i();
 }
 
 void IKController::GenerateDefaultRightArmConstraints(unsigned int manipulator_indx) {
+    
+    /*
+    * Set the min / max / final angles  and flexibility per join to some hard coded values
+    * Based on previous observations
+    */
+
     //Spine
     manipulators[manipulator_indx][0].min_angle = dx::XMConvertToRadians(-100);
     manipulators[manipulator_indx][0].max_angle = dx::XMConvertToRadians(20);
+    manipulators[manipulator_indx][0].final_angle = dx::XMConvertToRadians(-45);
+    manipulators[manipulator_indx][0].flexibility = 1.0;
 
     //Upper spine
     manipulators[manipulator_indx][1].min_angle = dx::XMConvertToRadians(-50);
     manipulators[manipulator_indx][1].max_angle = dx::XMConvertToRadians(20);
+    manipulators[manipulator_indx][1].final_angle = dx::XMConvertToRadians(5);
+    manipulators[manipulator_indx][1].flexibility = 1.0;
 
     //Upper arm
     manipulators[manipulator_indx][2].min_angle = dx::XMConvertToRadians(80);
     manipulators[manipulator_indx][2].max_angle = dx::XMConvertToRadians(170);
+    manipulators[manipulator_indx][2].final_angle = dx::XMConvertToRadians(93);
+    manipulators[manipulator_indx][2].flexibility = 1.0;
 
     //Lower arm
     manipulators[manipulator_indx][3].min_angle = dx::XMConvertToRadians(15);
     manipulators[manipulator_indx][3].max_angle = dx::XMConvertToRadians(150);
+    manipulators[manipulator_indx][3].final_angle = dx::XMConvertToRadians(99);
+    manipulators[manipulator_indx][3].flexibility = 1.0;
 
     //Hand
     manipulators[manipulator_indx][4].min_angle = dx::XMConvertToRadians(0);
     manipulators[manipulator_indx][4].max_angle = dx::XMConvertToRadians(150);
+    manipulators[manipulator_indx][4].final_angle = dx::XMConvertToRadians(0);
+    manipulators[manipulator_indx][4].flexibility = 1.0;
 }
 
 void IKController::SetManipulatorConstraits(unsigned int manipulator_indx) {
@@ -310,6 +325,25 @@ void IKController::Reset() {
             parent_transform = modelTransform;
         }
     }
+}
+
+arma::mat IKController::GenerateConstrainedWeights(unsigned int manipulator_indx) {
+    manipulator curr_manipulator = manipulators[manipulator_indx];
+    unsigned int joint_n = curr_manipulator.size() - 1;
+    arma::mat w(joint_n, 1);
+    float max_weight = 0;
+    for (unsigned int i = 0; i < joint_n; ++i) {
+        Joint& joint = curr_manipulator[i];
+        w(i, 0) = joint.flexibility * (joint.final_angle - joint.rot_angle);
+        if (w(i, 0) > max_weight)
+            max_weight = w(i, 0);
+    }
+
+    //Convert all weights into the range 0 - 1 and apply the weight factor
+    for (unsigned int i = 0; i < joint_n; ++i) {
+        w(i, 0) = (w(i, 0) / max_weight) * weight_factor;
+    }
+    return w;
 }
 
 
