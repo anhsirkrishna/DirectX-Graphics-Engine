@@ -61,3 +61,7 @@ void Camera::Update(float dt) noexcept {
 void Camera::SetControlWindow(Window* _control_window) {
 	control_window = _control_window;
 }
+
+void Camera::SetR(float _r) {
+	r = _r;
+}

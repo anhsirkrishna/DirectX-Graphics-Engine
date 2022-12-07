@@ -32,6 +32,20 @@ void Path::PopControlPoint(unsigned int segment) {
 }
 
 /*
+* Gets a list of all the control points
+* Returns: std::vector<dx::XMFLOAT3> List of all control points
+*/
+std::vector<dx::XMFLOAT3> Path::GetAllControlPoints() {
+	std::vector<dx::XMFLOAT3> ret_list;
+	for (auto& segment : control_segments) {
+		for (auto& control_points : segment) {
+			ret_list.push_back(control_points);
+		}
+	}
+	return ret_list;
+}
+
+/*
 * Replaces the last point in the segment,
 * accounting for the appended extra points.
 */

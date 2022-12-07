@@ -145,20 +145,22 @@ AnimationController::~AnimationController() {
 }
 
 void AnimationController::Update(float dt) {
-	animation_path->Update(dt);
-	float curr_velo = animation_path->GetCurrentVelocity();
-	animation_speed = curr_velo / active_animation->pace;
-	if (curr_velo < 50) {
-		//Idle animation
-		SwitchAnimation(0);
-	}
-	else if (curr_velo > animation_path->constant_velocity * (2.0f/3)) {
-		//Run animation
-		SwitchAnimation(1);
-	}
-	else {
-		//Walk animation
-		SwitchAnimation(2);
+	if (animation_path) {
+		animation_path->Update(dt);
+		float curr_velo = animation_path->GetCurrentVelocity();
+		animation_speed = curr_velo / active_animation->pace;
+		if (curr_velo < 50) {
+			//Idle animation
+			SwitchAnimation(0);
+		}
+		else if (curr_velo > animation_path->constant_velocity * (2.0f / 3)) {
+			//Run animation
+			SwitchAnimation(1);
+		}
+		else {
+			//Walk animation
+			SwitchAnimation(2);
+		}
 	}
 
 	animation_time += dt * animation_speed;
@@ -175,8 +177,10 @@ void AnimationController::Update(float dt) {
 			animation_blending = false;
 		}
 	}
-	ShowPathControls();
-	ShowAnimationControls();
+	if (animation_path) {
+		ShowPathControls();
+		ShowAnimationControls();
+	}
 }
 
 void AnimationController::ClearTrackData() {

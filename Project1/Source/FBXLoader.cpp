@@ -98,13 +98,7 @@ void PrintRootNode(FbxNode* pNode) {
 	}
 }
 
-FBXLoader::FBXLoader() : bind_pose(nullptr) {
-	/*
-	* "Human mesh animated"
-	* https://www.turbosquid.com/3d-models/free-human-base-mesh-animations-3d-model/1049650
-	*/
-
-	const char* filename = "BaseMesh_Anim.fbx";
+FBXLoader::FBXLoader(const char* filename) : bind_pose(nullptr) {
 
 	// Initialize the SDK manager. This object handles memory management.
 	fbx_sdk_manager = FbxManager::Create();

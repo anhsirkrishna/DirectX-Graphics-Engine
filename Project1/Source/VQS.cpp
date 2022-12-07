@@ -9,6 +9,11 @@ dx::XMFLOAT3 Lerp(const dx::XMFLOAT3& v_0, const  dx::XMFLOAT3& v_n, float t) {
 	);
 }
 
+//Lerp between two floats
+float Lerp(float v_0, float v_n, float t) {
+	return (1 - t) * v_0 + t * v_n;
+}
+
 VQS::VQS() : v(0.0f, 0.0f, 0.0f), q(), s(1.0f) {
 }
 
@@ -85,13 +90,12 @@ dx::XMMATRIX VQS::toMatrix() const {
 		q.toVector(),
 		dx::XMVectorSet(v.x, v.y, v.z, 1.0f)
 	);
-	//return  q.toMatrix() * dx::XMMatrixTranslation(v.x, v.y, v.z);
 }
 
 VQS VQS::InterpolateTo(const VQS& vqs_n, float t) {
 	return VQS(
 		Lerp(v, vqs_n.v, t),
 		q.InterpolateTo(vqs_n.q, t), 
-		1.0f);
+		Lerp(s, vqs_n.s, t));
 }
 

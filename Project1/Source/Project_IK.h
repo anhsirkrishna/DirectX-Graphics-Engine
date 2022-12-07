@@ -10,8 +10,13 @@ public:
 	*/
 	void Setup() override;
 	/*
+	* Function called when this project is set as the active one
+	*/
+	void Enter() override;
+
+	/*
 	* Update the objects and drawables in the project
-	* Performs the logic required for the logic
+	* Performs the logic required for the project
 	*/
 	void Update(float dt) override;
 	/*
@@ -24,7 +29,6 @@ public:
 	*/
 	void ProjectControls();
 
-
 	/*
 	* Control the position of the target
 	*/
@@ -36,7 +40,10 @@ private:
 	std::unique_ptr<Model> draw_model;
 	std::unique_ptr<Curve> draw_path;
 	std::unique_ptr<SolidSphere> target_sphere;
-	
+	std::unique_ptr<SolidSphere> draw_control_point;
+	std::unique_ptr<DrawPlane> draw_floor;
+	std::vector<dx::XMFLOAT3> all_control_points;
+
 	dx::XMFLOAT3 target_position;
 	dx::XMFLOAT3 starting_position;
 	float distance_threshold = 10.0f;

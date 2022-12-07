@@ -16,34 +16,6 @@ LineTree::LineTree(Graphics& gfx, const Skeleton& skeleton) {
 	namespace dx = DirectX;
 
 	if (!IsStaticInitialized()) {
-		struct LineTreeVertex
-		{
-			dx::XMUINT2 bone_index;
-		};
-
-		std::vector<LineTreeVertex> vertices;
-		std::vector<int> vertex_indices;
-
-		int bone_vertex_index = 0;
-		LineTreeVertex vertex;
-		for (auto parent_bone : skeleton.hierarchy) {
-			for (auto bone : parent_bone->children) {
-				//Bone consists of two vertices
-				
-				//First vertex is the parent bone
-				vertex.bone_index.x = parent_bone->bone_indx;
-				vertices.push_back(vertex);
-				vertex_indices.push_back(bone_vertex_index++);
-				
-				//Second vertex is the child bone
-				vertex.bone_index.x = bone->bone_indx;
-				vertices.push_back(vertex);
-				vertex_indices.push_back(bone_vertex_index++);
-			}
-		}
-		AddStaticBind(std::make_unique<VertexBuffer>(gfx, vertices));
-		AddStaticIndexBuffer(std::make_unique<IndexBuffer>(gfx, vertex_indices));
-
 		auto pvs = std::make_unique<VertexShader>(gfx, L"SkeletonVS.cso");
 		auto pvsbc = pvs->GetBytecode();
 		AddStaticBind(std::move(pvs));
@@ -58,9 +30,34 @@ LineTree::LineTree(Graphics& gfx, const Skeleton& skeleton) {
 
 		AddStaticBind(std::make_unique<Topology>(gfx, D3D11_PRIMITIVE_TOPOLOGY_LINELIST));
 	}
-	else {
-		SetIndexFromStatic();
+
+	struct LineTreeVertex
+	{
+		dx::XMUINT2 bone_index;
+	};
+
+	std::vector<LineTreeVertex> vertices;
+	std::vector<int> vertex_indices;
+
+	int bone_vertex_index = 0;
+	LineTreeVertex vertex;
+	for (auto parent_bone : skeleton.hierarchy) {
+		for (auto bone : parent_bone->children) {
+			//Bone consists of two vertices
+
+			//First vertex is the parent bone
+			vertex.bone_index.x = parent_bone->bone_indx;
+			vertices.push_back(vertex);
+			vertex_indices.push_back(bone_vertex_index++);
+
+			//Second vertex is the child bone
+			vertex.bone_index.x = bone->bone_indx;
+			vertices.push_back(vertex);
+			vertex_indices.push_back(bone_vertex_index++);
+		}
 	}
+	AddBind(std::make_unique<VertexBuffer>(gfx, vertices));
+	AddIndexBuffer(std::make_unique<IndexBuffer>(gfx, vertex_indices));
 
 	AddBind(std::make_unique<TransformCBuf>(gfx, *this));
 

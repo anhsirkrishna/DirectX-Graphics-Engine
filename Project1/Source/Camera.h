@@ -1,6 +1,7 @@
 #pragma once
 #include "Graphics.h"
 #include "Window.h"
+#include <armadillo>
 
 class Camera
 {
@@ -10,6 +11,7 @@ public:
 	void Reset() noexcept;
 	void Update(float dt) noexcept;
 	void SetControlWindow(Window* _control_window);
+	void SetR(float _r);
 private:
 	float r = 400.0f;
 	float theta = 0.0f;

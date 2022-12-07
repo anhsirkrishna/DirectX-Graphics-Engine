@@ -1,6 +1,10 @@
 #include "SolidSphere.h"
-#include "Project_IK.h"
 #include "imgui/imgui.h"
+#include "App.h"
+#include "Model.h"
+#include "Animation.h"
+#include "Curve.h"
+#include "Project_IK.h"
 
 Project_IK::Project_IK(App* _p_parent_app) :
 	Project(_p_parent_app, "Inverse Kinematics"), target_position() {
@@ -35,7 +39,21 @@ void Project_IK::Setup() {
 	animation_path->GenerateDefaultVelocityFunction();
 
 	animation_path->loop_time = 15;
+	all_control_points = animation_path->GetAllControlPoints();
+	all_control_points.pop_back();
+
 	draw_model->controller->SetAnimationPath(animation_path.release());
+
+	draw_control_point = std::make_unique<SolidSphere>(gfx_ref, 2);
+	draw_floor = std::make_unique<DrawPlane>(gfx_ref, TEXT("Dirt_01.jpg"));
+	draw_floor->SetScale(1000.0f);
+	draw_floor->SetPosition(dx::XMFLOAT3(0.0f, -505.0f, 200.0f));
+	draw_floor->SetRotation(dx::XMMatrixRotationRollPitchYaw(dx::XMVectorGetX(dx::g_XMHalfPi), 0.0f, 0.0f));
+}
+
+void Project_IK::Enter() {
+	Camera& cam = p_parent_app->GetCamera();
+	cam.SetR(450.f);
 }
 
 void Project_IK::Update(float dt) {
@@ -77,14 +95,22 @@ void Project_IK::Update(float dt) {
 			draw_model->ik_mode = false;
 			draw_model->ik_controller->Reset();
 		}
-	}	
+	}
+
+	draw_floor->Update(dt);
 }
 
 void Project_IK::Draw() {
 	Window& window_ref = p_parent_app->GetWindow();
+	draw_floor->Draw(window_ref.Gfx());
 	draw_model->Draw(window_ref.Gfx());
 	draw_path->Draw(window_ref.Gfx());
 	target_sphere->Draw(window_ref.Gfx());
+
+	for (auto& control_point : all_control_points) {
+		draw_control_point->SetPosition(control_point);
+		draw_control_point->Draw(window_ref.Gfx());
+	}
 }
 
 void Project_IK::ProjectControls() {

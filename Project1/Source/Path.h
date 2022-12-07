@@ -103,6 +103,12 @@ public:
 	void PopControlPoint(unsigned int segment);
 
 	/*
+	* Gets a list of all the control points
+	* Returns: std::vector<dx::XMFLOAT3> List of all control points
+	*/
+	std::vector<dx::XMFLOAT3> GetAllControlPoints();
+
+	/*
 	* Replaces the last point in the segment, 
 	* accounting for the appended extra points.
 	*/

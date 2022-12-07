@@ -1,8 +1,14 @@
+#include "App.h"
 #include "Project_PathAnimation.h"
 
 Project_PathAnimation::Project_PathAnimation(App* _p_parent_app) : 
 	Project(_p_parent_app, "Path Animation") {
 
+}
+
+void Project_PathAnimation::Enter() {
+	Camera& cam = p_parent_app->GetCamera();
+	cam.SetR(450.f);
 }
 
 void Project_PathAnimation::Setup() {
@@ -11,7 +17,7 @@ void Project_PathAnimation::Setup() {
 	FBXLoader& fbx_ref = p_parent_app->GetSceneLoader();
 	draw_model->LoadModel(p_parent_app->GetWindow().Gfx(), &fbx_ref, TEXT("Max_Red_Body_Diffuse.png"));
 
-	std::unique_ptr<Path> animation_path = std::make_unique<Path>();
+	Path* animation_path = new Path();
 	animation_path->AddControlSegment();
 	animation_path->AddControlPoint(dx::XMFLOAT3(-140.0f, 0.0f, 190.0f), 0);
 	animation_path->AddControlPoint(dx::XMFLOAT3(-180.0f, 0.0f, 150.0f), 0);
@@ -46,17 +52,32 @@ void Project_PathAnimation::Setup() {
 	animation_path->GenerateForwardDiffTable();
 	animation_path->GenerateDefaultVelocityFunction();
 
-	draw_model->controller->SetAnimationPath(animation_path.release());
+	all_control_points = animation_path->GetAllControlPoints();
+	draw_model->controller->SetAnimationPath(animation_path);
+
+	draw_control_point = std::make_unique<SolidSphere>(gfx_ref, 2);
+
+	draw_floor = std::make_unique<DrawPlane>(gfx_ref, TEXT("Dirt_01.jpg"));
+	draw_floor->SetScale(1000.0f);
+	draw_floor->SetPosition(dx::XMFLOAT3(0.0f, -505.0f, 200.0f));
+	draw_floor->SetRotation(dx::XMMatrixRotationRollPitchYaw(dx::XMVectorGetX(dx::g_XMHalfPi), 0.0f, 0.0f));
 }
 
 void Project_PathAnimation::Update(float dt) {
 	Window& window_ref = p_parent_app->GetWindow();
 	draw_model->Update(window_ref.keyboard.isKeyPressed(VK_SPACE) ? 0.0f : dt);
 	draw_path->Update(dt);
+	draw_floor->Update(dt);
 }
 
 void Project_PathAnimation::Draw() {
 	Window& window_ref = p_parent_app->GetWindow();
+	draw_floor->Draw(window_ref.Gfx());
 	draw_model->Draw(window_ref.Gfx());
 	draw_path->Draw(window_ref.Gfx());
+
+	for (auto& control_point : all_control_points) {
+		draw_control_point->SetPosition(control_point);
+		draw_control_point->Draw(window_ref.Gfx());
+	}
 }

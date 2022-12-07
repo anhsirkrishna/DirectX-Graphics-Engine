@@ -25,7 +25,7 @@ void Model::LoadModel(Graphics& gfx, FBXLoader* fbx_loader, const wchar_t* tex_f
 	skeleton_drawable = std::make_unique<LineTree>(gfx, controller->GetSkel());
 
 	is_bind_pose = false;
-	draw_skeleton = true;
+	draw_skeleton = false;
 	draw_mesh = true;
 }
 
@@ -65,27 +65,33 @@ void Model::Draw(Graphics& gfx) {
 
 void Model::Update(float dt) noexcept {
 	if (not ik_mode) {
-		//Get current position based on the animation path
-		dx::XMVECTOR model_pos = controller->animation_path->GetCurrentPosition();
-		position.x = dx::XMVectorGetX(model_pos);
-		position.y = dx::XMVectorGetY(model_pos);
-		position.z = dx::XMVectorGetZ(model_pos);
+		if (controller->animation_path) {
+			//Get current position based on the animation path
+			dx::XMVECTOR model_pos = controller->animation_path->GetCurrentPosition();
+			position.x = dx::XMVectorGetX(model_pos);
+			position.y = dx::XMVectorGetY(model_pos);
+			position.z = dx::XMVectorGetZ(model_pos);
 
-		//Get rotation matrix based on COI approach 
-		dx::XMVECTOR look_pos = controller->animation_path->GetLookPosition();
-		dx::XMVECTOR roll = dx::XMVectorSubtract(model_pos, look_pos);
-		dx::XMVECTOR pitch = dx::XMVector3Cross(dx::XMVectorSet(0, 1, 0, 0), roll);
-		dx::XMVECTOR yaw = dx::XMVector3Cross(roll, pitch);
-		roll = dx::XMVector3Normalize(roll);
-		pitch = dx::XMVector3Normalize(pitch);
-		yaw = dx::XMVector3Normalize(yaw);
+			//Get rotation matrix based on COI approach 
+			dx::XMVECTOR look_pos = controller->animation_path->GetLookPosition();
+			dx::XMVECTOR roll = dx::XMVectorSubtract(model_pos, look_pos);
+			dx::XMVECTOR pitch = dx::XMVector3Cross(dx::XMVectorSet(0, 1, 0, 0), roll);
+			dx::XMVECTOR yaw = dx::XMVector3Cross(roll, pitch);
+			roll = dx::XMVector3Normalize(roll);
+			pitch = dx::XMVector3Normalize(pitch);
+			yaw = dx::XMVector3Normalize(yaw);
 
-		rotation = dx::XMMatrixSet(
-			pitch.m128_f32[0], pitch.m128_f32[1], pitch.m128_f32[2], 0,
-			yaw.m128_f32[0], yaw.m128_f32[1], yaw.m128_f32[2], 0,
-			roll.m128_f32[0], roll.m128_f32[1], roll.m128_f32[2], 0,
-			0, 0, 0, 1
-		);
+			rotation = dx::XMMatrixSet(
+				pitch.m128_f32[0], pitch.m128_f32[1], pitch.m128_f32[2], 0,
+				yaw.m128_f32[0], yaw.m128_f32[1], yaw.m128_f32[2], 0,
+				roll.m128_f32[0], roll.m128_f32[1], roll.m128_f32[2], 0,
+				0, 0, 0, 1
+			);
+		}
+		else {
+			position = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
+			rotation = dx::XMMatrixIdentity();
+		}
 	}
 
 	mesh->SetRotation(rotation);

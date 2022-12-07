@@ -12,8 +12,9 @@
 #include "Model.h"
 #include "Path.h"
 #include "Curve.h"
-
-class Project;
+#include "SolidSphere.h"
+#include "DrawPlane.h"
+#include "Project.h"
 
 class App {
 public:
@@ -22,13 +23,14 @@ public:
 	int Run();
 	Window& GetWindow();
 	FBXLoader& GetSceneLoader();
+	Camera& GetCamera();
 private:
 	ImGUIManager imgui;
 	Window window;
 	FBXLoader fbx_loader;
 	void Update();
 
-	std::vector<Project*> project_list;
+	std::vector<std::unique_ptr<Project>> project_list;
 	Project* active_project;
 
 	float speed_factor = 1.0f;

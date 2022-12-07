@@ -4,9 +4,16 @@
 #include "FBXAnimation.h"
 class FBXMesh;
 
+/*
+* CREDITS:
+* "Human mesh animated"
+* https://www.turbosquid.com/3d-models/free-human-base-mesh-animations-3d-model/1049650
+*/
+
 class FBXLoader {
 public:
-	FBXLoader();
+	
+	FBXLoader(const char* filename = "BaseMesh_Anim.fbx");
 	~FBXLoader();
 
 	void CollectMeshes(FbxNode* pRootNode);

@@ -8,6 +8,7 @@
 #include "imgui/imgui.h"
 #include "Project_PathAnimation.h"
 #include "Project_IK.h"
+#include "Project_SkeletonAnimation.h"
 
 int WindowHeight = 720;
 int WindowWidth = 1280;
@@ -23,11 +24,12 @@ App::App() : window(WindowWidth, WindowHeight, TEXT("Direct3D Engine")) {
 	window.Gfx().SetProjection(dx::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 2000.0f));
 
 	fbx_loader.ExtractSceneData();
-	
-	project_list.push_back(new Project_PathAnimation(this));
 
-	project_list.push_back(new Project_IK(this));
-	active_project = project_list.back();
+	project_list.emplace_back(new Project_SkeletonAnimation(this));
+	project_list.emplace_back(new Project_PathAnimation(this));
+	project_list.emplace_back(new Project_IK(this));
+	
+	active_project = project_list[0].get();
 	
 	for (auto& proj : project_list)
 		proj->Setup();
@@ -48,6 +50,10 @@ Window& App::GetWindow() {
 
 FBXLoader& App::GetSceneLoader() {
 	return fbx_loader;
+}
+
+Camera& App::GetCamera() {
+	return cam;
 }
 
 void App::Update() {
@@ -91,7 +97,11 @@ void App::ProjectSelectionMenu() noexcept {
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("Project Selector")) {
 			for (auto& proj : project_list) {
-				if (ImGui::MenuItem(proj->GetName().c_str(), "", active_project == proj)) { active_project = proj; }
+				if (ImGui::MenuItem(proj->GetName().c_str(), "", active_project == proj.get())) 
+				{ 
+					active_project = proj.get();
+					active_project->Enter();
+				}
 			}
 			ImGui::EndMenu();
 		}
