@@ -45,6 +45,7 @@ PhysicsObject::PhysicsObject(std::vector<DirectX::XMFLOAT3> positions, std::vect
 	MoveToOrigin();
 
 	vertex_positions.resize(vertices.size());
+	CalculateIObj();
 }
 
 PhysicsObject::PhysicsObject(const std::vector<std::pair<DirectX::XMFLOAT3, float>>& vertices) :
@@ -55,6 +56,7 @@ PhysicsObject::PhysicsObject(const std::vector<std::pair<DirectX::XMFLOAT3, floa
 	MoveToOrigin();
 
 	vertex_positions.resize(vertices.size());
+	CalculateIObj();
 }
 
 /*
@@ -69,17 +71,44 @@ void PhysicsObject::CalculateIObj() {
 
 		Ixy += vertex.mass * (vertex.r_i.x * vertex.r_i.y);
 		Ixz += vertex.mass * (vertex.r_i.x * vertex.r_i.z);
-		Iyz += vertex.mass * (vertex.r_i.y * vertex.r_i.y);
+		Iyz += vertex.mass * (vertex.r_i.y * vertex.r_i.z);
 	}
 
 	Iobj = dx::XMMATRIX(
 		 Ixx, -Ixy, -Ixz, 0,
 		-Ixy,  Iyy, -Iyz, 0,
-		-Ixz, -Iyz, -Izz, 0,
-		0, 0, 0, 0
+		-Ixz, -Iyz, Izz, 0,
+		0, 0, 0, mass
 	);
 
+
 	Iobj_inv = dx::XMMatrixInverse(nullptr, Iobj);
+
+	//==================================
+	//The last vertex is the one with all positive dimensions
+	/*float x = vertices.back().r_i.x;
+	float y = vertices.back().r_i.y;
+	float z = vertices.back().r_i.z;
+
+	dx::XMMATRIX Iobj_x = mass * dx::XMMATRIX(
+		y*y + z*z, 0, 0, 0,
+		0, x*x + z*z, 0, 0,
+		0, 0, x*x + y*y, 0,
+		0, 0, 0, 1
+	);
+
+	dx::XMMATRIX Iobj_inv_x = (1.0f/mass) * dx::XMMATRIX(
+		1.0f / (y * y + z * z), 0, 0, 0,
+		0, 1.0f / (x * x + z * z), 0, 0,
+		0, 0, 1.0f / (x * x + y * y), 0,
+		0, 0, 0, 1
+	);
+
+	Iobj = Iobj_x;
+	Iobj_inv = Iobj_inv_x;*/
+	//==================================
+
+
 }
 
 void PhysicsObject::Add(const PhysicsState& _other) {

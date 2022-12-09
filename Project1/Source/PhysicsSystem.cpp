@@ -11,15 +11,6 @@ namespace dx = DirectX;
 * ~ Operator to convert a vector to a matrix
 * Returns : XMMATRIX
 */
-dx::XMMATRIX TildeOperator(dx::XMFLOAT3 vec) {
-	return dx::XMMATRIX(
-		0, -vec.z, vec.y, 0,
-		vec.z, 0, -vec.x, 0,
-		-vec.y, vec.x, 0, 0,
-		0, 0, 0, 0
-	);
-}
-
 dx::XMMATRIX TildeOperator(dx::XMVECTOR _vec) {
 	dx::XMFLOAT3 vec;
 	dx::XMStoreFloat3(&vec, _vec);
@@ -27,15 +18,59 @@ dx::XMMATRIX TildeOperator(dx::XMVECTOR _vec) {
 		0, -vec.z, vec.y, 0,
 		vec.z, 0, -vec.x, 0,
 		-vec.y, vec.x, 0, 0,
-		0, 0, 0, 0
+		0, 0, 0, 1
 	);
 }
 
 void PhysicsSystem::EulerIntegrate(PhysicsObject* _obj, float dt) {
-	PhysicsState delta_vals;
-	Derivative(_obj, dt, delta_vals);
-	delta_vals.Scale(dt);
-	_obj->Add(delta_vals);
+	PhysicsState curr_state{
+		.c = _obj->position,
+		.R = _obj->rotational_positon,
+		.P = _obj->momentum,
+		.L = _obj->angular_momentum,
+	};
+	PhysicsState k1;
+	Derivative(curr_state, _obj, k1);
+	k1.Scale(dt);
+	_obj->Add(k1);
+
+	elapsed_time += dt;
+}
+
+void PhysicsSystem::RK4Integrate(PhysicsObject* _obj, float dt) {
+	PhysicsState curr_state{
+		.c = _obj->position,
+		.R = _obj->rotational_positon,
+		.P = _obj->momentum,
+		.L = _obj->angular_momentum,
+	};
+	PhysicsState k1, k2, k3, k4;
+
+	//k1 = dt * (y`(yi))
+	Derivative(curr_state, _obj, k1);
+	k1.Scale(dt);
+	
+	//k2 = dt * (y`(yi + k1/2))
+	PhysicsState temp = k1 * 0.5;
+	temp = curr_state + temp;
+	Derivative(temp, _obj, k2);
+	k2.Scale(dt);
+
+	//k3 = dt * (y`(yi + k2/2))
+	temp = k2 * 0.5;
+	temp = curr_state + temp;
+	Derivative(temp, _obj, k3);
+	k3.Scale(dt);
+
+	//k4 = dt * (y`(yi + k3))
+	temp = curr_state + k3;
+	Derivative(temp, _obj, k4);
+	k4.Scale(dt);
+
+	//yi+1 = yi + (k1 + 2k2 + 2k3 + k4)*(1/6)
+	temp = (k1 + k2 * 2 + k3 * 2 + k4) * (1.0f / 6);
+	_obj->Add(temp);
+
 	elapsed_time += dt;
 }
 
@@ -61,6 +96,13 @@ void PhysicsSystem::CalculateVelocities() {
 		//I-inv(t) = R(t) * Iobj-inv * R(t)-trans
 		dx::XMMATRIX I_inv =
 			obj->rotational_positon * obj->Iobj_inv * dx::XMMatrixTranspose(obj->rotational_positon);
+		I_inv = 
+			dx::XMMatrixMultiply(
+				dx::XMMatrixMultiply(
+					obj->rotational_positon,
+					obj->Iobj_inv
+				),
+				dx::XMMatrixTranspose(obj->rotational_positon));
 
 		//w(t) = I-inv(t) * L(t)
 		obj->angular_velocity = dx::XMVector3Transform(obj->angular_momentum, I_inv);
@@ -69,7 +111,57 @@ void PhysicsSystem::CalculateVelocities() {
 }
 
 void PhysicsSystem::SystemControls() {
+	unsigned int indx = 0;
 	if (ImGui::Begin("Physics controls")) {
+
+		if (ImGui::BeginMenu("Integration Method")) {
+			if (ImGui::MenuItem("Euler", "", use_method == IntegrateMethod::EULER)) use_method = IntegrateMethod::EULER;
+			if (ImGui::MenuItem("Runge-Kutta 4th", "", use_method == IntegrateMethod::RK4)) use_method = IntegrateMethod::RK4;
+			ImGui::EndMenu();
+		}
+
+		//=========================================
+		ImGui::SliderFloat("Spring Coefficient", &spring_coeff, 0.1f, 1000.0f);
+		ImGui::SliderFloat("Damper Coefficient", &damper_coeff, 0.1f, 1000.0f);
+		ImGui::SliderFloat("Stick widht", &stick_width, 0.0f, 10.0f);
+		//=========================================
+
+		if (ImGui::Button("Add Global Force")) {
+			global_forces.push_back(dx::XMVectorZero());
+		}
+		ImGui::Text("Global Forces :");
+		indx = 0;
+		for (auto& force : global_forces) {
+			float force_val[3] = {
+				dx::XMVectorGetX(force),
+				dx::XMVectorGetY(force),
+				dx::XMVectorGetZ(force)
+			};
+			std::string str = "Global Force " + std::to_string(indx);
+			ImGui::SliderFloat3(str.c_str(), force_val, -100, 100);
+			force =
+				dx::XMVectorSet(force_val[0], force_val[1], force_val[2], 0.0f);
+			indx++;
+		}
+
+		if (ImGui::Button("Add Global Torque")) {
+			global_torques.push_back(dx::XMVectorZero());
+		}
+		ImGui::Text("Global Torques :");
+		indx = 0;
+		for (auto& torque : global_torques) {
+			float torque_val[3] = {
+				dx::XMVectorGetX(torque),
+				dx::XMVectorGetY(torque),
+				dx::XMVectorGetZ(torque)
+			};
+			std::string str = "Global Torque " + std::to_string(indx);
+			ImGui::SliderFloat3(str.c_str(), torque_val, -10, 10);
+			torque =
+				dx::XMVectorSet(torque_val[0], torque_val[1], torque_val[2], 0.0f);
+			indx++;
+		}
+
 		//=========================================
 		float anchor_1_pos[3] = {
 			anchor_points[0].x,
@@ -94,10 +186,7 @@ void PhysicsSystem::SystemControls() {
 
 		//=========================================
 
-		ImGui::SliderFloat("Spring Coefficient", &spring_coeff, 0.1f, 1000.0f);
-		ImGui::SliderFloat("Damper Coefficient", &damper_coeff, 0.1f, 1000.0f);
-		ImGui::SliderFloat("Stick widht", &stick_width, 0.0f, 10.0f);
-		unsigned int indx = 0;
+		indx = 0;
 		for (auto& obj : physics_objects) {
 			float obj_pos[3] = {
 				dx::XMVectorGetX(obj->position),
@@ -115,7 +204,7 @@ void PhysicsSystem::SystemControls() {
 }
 
 PhysicsSystem::PhysicsSystem(Graphics& gfx) : gfx_ref(gfx),
-	elapsed_time(0), use_method(IntegrateMethod::EULER), 
+	elapsed_time(0), use_method(IntegrateMethod::RK4), 
 	anchor_sphere_1(gfx, 5), anchor_sphere_2(gfx, 5), 
 	spring_coeff(100.0f), damper_coeff(100.0f) {
 
@@ -136,17 +225,28 @@ PhysicsSystem::~PhysicsSystem() {
 	}
 }
 
-void PhysicsSystem::Derivative(PhysicsObject* _obj,
-								float t, PhysicsState& _output) {
+void PhysicsSystem::Derivative(PhysicsState& _input, PhysicsObject* _obj, PhysicsState& _output) {
+	//c`(t) = v(t) = P(t)/M
+	_output.c = dx::XMVectorScale(_input.P, 1.0f / _obj->mass);
 
-	//Update the forces on the object using the stick-spring system
-	UpdateStickForces(_obj);
+	//I-inv(t) = R(t) * Iobj-inv * R(t)-trans
+	dx::XMMATRIX I_inv =
+		_input.R * _obj->Iobj_inv * dx::XMMatrixTranspose(_input.R);
 
-	//c`(t) = P(t)/M
-	_output.c = _obj->velocity;
+	I_inv =
+		dx::XMMatrixMultiply(
+			dx::XMMatrixMultiply(
+				_input.R,
+				_obj->Iobj_inv
+			),
+			dx::XMMatrixTranspose(_input.R));
+
+	//w(t) = I-inv(t) * L(t)
+	dx::XMVECTOR omega = dx::XMVector3Transform(_input.L, I_inv);
 
 	//R`(t) = ~w(t) * R(t)
-	_output.R = TildeOperator(_obj->angular_velocity) * _obj->rotational_positon;
+	_output.R = TildeOperator(omega) * _input.R;
+	_output.R = dx::XMMatrixMultiply(TildeOperator(omega), _input.R);
 
 	//P`(t) = F(t)
 	dx::XMVECTOR F = dx::XMVectorAdd(
@@ -161,9 +261,10 @@ void PhysicsSystem::Derivative(PhysicsObject* _obj,
 }
 
 void PhysicsSystem::Integrate(PhysicsObject* _obj, float dt){
-	if (use_method == IntegrateMethod::EULER) {
+	if (use_method == IntegrateMethod::EULER)
 		EulerIntegrate(_obj, dt);
-	}
+	else if (use_method == IntegrateMethod::RK4)
+		RK4Integrate(_obj, dt);
 }
 
 void PhysicsSystem::UpdateStickForces(PhysicsObject* _obj) {
@@ -332,21 +433,8 @@ void PhysicsSystem::AddPhysicsObject(const std::vector<std::pair<dx::XMFLOAT3, f
 	anchor_points[0].x -= 5;
 	anchor_points[1].x += 5;
 
-	//Move the existing objects to make room 
-	for (auto& obj : physics_objects) {
-		obj->position = dx::XMVectorSetX(
-			obj->position,
-			dx::XMVectorGetX(obj->position) - 10
-		);
-	}
 
 	PhysicsObject* phy_obj = new PhysicsObject(vertices);
-	phy_obj->position = dx::XMVectorSet(
-		anchor_points[1].x - 20,
-		anchor_points[1].y,
-		anchor_points[1].z,
-		0.0f
-	);
 	physics_objects.push_back(phy_obj);
 
 	std::vector<dx::XMFLOAT3> draw_vertices;
@@ -366,6 +454,8 @@ void PhysicsSystem::Update(float dt) {
 	CalculateVelocities();
 
 	for (auto& obj : physics_objects) {
+		//Update the forces on the object using the stick-spring system
+		UpdateStickForces(obj);
 		Integrate(obj, dt);
 
 		//Update the object positions with the new positions for this frame

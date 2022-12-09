@@ -37,6 +37,7 @@ App::App() : window(WindowWidth, WindowHeight, TEXT("Direct3D Engine")) {
 		proj->Setup();
 
 	active_project->Enter();
+	timer.Reset();
 }
 
 int App::Run() {

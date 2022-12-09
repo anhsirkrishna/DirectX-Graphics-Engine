@@ -22,6 +22,26 @@ struct PhysicsState
 		P = DirectX::XMVectorScale(P, t);
 		L = DirectX::XMVectorScale(L, t);
 	}
+
+	PhysicsState operator+(const PhysicsState& _other) const {
+		PhysicsState ret_state;
+		ret_state.c = DirectX::XMVectorAdd(c, _other.c);
+		ret_state.R = R + _other.R;
+		ret_state.P = DirectX::XMVectorAdd(P, _other.P);
+		ret_state.L = DirectX::XMVectorAdd(L, _other.L);
+
+		return ret_state;
+	}
+
+	PhysicsState operator*(float m) const {
+		PhysicsState ret_state;
+		ret_state.c = DirectX::XMVectorScale(c, m);
+		ret_state.R = R * m;
+		ret_state.P = DirectX::XMVectorScale(P, m);
+		ret_state.L = DirectX::XMVectorScale(L, m);
+
+		return ret_state;
+	}
 };
 
 class PhysicsObject;
@@ -50,7 +70,8 @@ private:
 
 	float elapsed_time;
 	enum class IntegrateMethod {
-		EULER
+		EULER,
+		RK4
 	};
 	IntegrateMethod use_method;
 
@@ -83,6 +104,11 @@ private:
 	* Euler's method for integration by timesetp dt
 	*/
 	void EulerIntegrate(PhysicsObject* _obj, float dt);
+
+	/*
+	* Runge-Kutta 4th order method for integration by timesetp dt
+	*/
+	void RK4Integrate(PhysicsObject* _obj, float dt);
 	
 	/*
 	* Calculates all the global forces acting on the system
@@ -95,8 +121,7 @@ private:
 	* and stores it in total_global_torque
 	*/
 	void CalculateAllTorques();
-
-	void Derivative(PhysicsObject* _obj, float dt, PhysicsState& _output);
+	void Derivative(PhysicsState& _input, PhysicsObject* _obj, PhysicsState& _output);
 	void Integrate(PhysicsObject* _obj, float dt);
 
 	/*

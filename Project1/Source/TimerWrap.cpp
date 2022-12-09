@@ -7,6 +7,11 @@ TimerWrap::TimerWrap() noexcept {
 	start = steady_clock::now();
 }
 
+void TimerWrap::Reset() noexcept {
+	last = steady_clock::now();
+	start = steady_clock::now();
+}
+
 float TimerWrap::Mark() noexcept {
 	const auto old = last;
 	last = steady_clock::now();

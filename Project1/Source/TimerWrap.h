@@ -5,6 +5,7 @@ class TimerWrap
 {
 public:
 	TimerWrap() noexcept;
+	void Reset() noexcept;
 	float Mark() noexcept;
 	float Peek() const noexcept;
 private:

@@ -44,7 +44,7 @@ Project_Physics::Project_Physics(App* _p_parent_app) :
 		std::make_pair(dx::XMFLOAT3(width, height, depth), 1.0f)
 	);
 
-	physics_system.SetStickWidth(0.0f);
+	physics_system.SetStickWidth(width);
 }
 
 void Project_Physics::Setup() {
