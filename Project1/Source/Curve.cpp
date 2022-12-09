@@ -38,7 +38,7 @@ Curve::Curve(Graphics& gfx, const std::vector<dx::XMFLOAT3>& curve_points) {
 	AddIndexBuffer(std::make_unique<IndexBuffer>(gfx, vertex_indices));
 
 	AddBind(std::make_unique<TransformCBuf>(gfx, *this));
-	SetPosition(dx::XMFLOAT3(0.0f, -2.5f, 0.0f));
+	SetPosition(dx::XMFLOAT3(0.0f, 0.0f, 0.0f));
 	// model deformation transform (per instance, not stored as bind)
 	SetModelTransform();
 }

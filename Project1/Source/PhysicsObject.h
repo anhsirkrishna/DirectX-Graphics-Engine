@@ -29,12 +29,6 @@ public:
 	void Add(const PhysicsState& _other);
 
 	/*
-	* Get the position of a single vertex specified by i
-	* Qi(t) function
-	*/
-	DirectX::XMVECTOR GetQi(unsigned int i);
-
-	/*
 	* Gets the current positions of the vertices
 	* Returns: const ref to vertex_positions
 	*/
@@ -50,9 +44,9 @@ private:
 	//Center of mass before moving it to origin
 	DirectX::XMVECTOR center_of_mass;
 	//Intertial Tensor
-	DirectX::XMMATRIX Iobj;
+	DirectX::XMFLOAT3X3 Iobj;
 	//Intertial Tensor Inverse
-	DirectX::XMMATRIX Iobj_inv;
+	DirectX::XMFLOAT3X3 Iobj_inv;
 
 	//x(t) == c(t)
 	DirectX::XMVECTOR position;

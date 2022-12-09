@@ -95,14 +95,9 @@ void PhysicsSystem::CalculateVelocities() {
 
 		//I-inv(t) = R(t) * Iobj-inv * R(t)-trans
 		dx::XMMATRIX I_inv =
-			obj->rotational_positon * obj->Iobj_inv * dx::XMMatrixTranspose(obj->rotational_positon);
-		I_inv = 
-			dx::XMMatrixMultiply(
-				dx::XMMatrixMultiply(
-					obj->rotational_positon,
-					obj->Iobj_inv
-				),
-				dx::XMMatrixTranspose(obj->rotational_positon));
+			obj->rotational_positon * 
+			dx::XMLoadFloat3x3(&obj->Iobj_inv) * 
+			dx::XMMatrixTranspose(obj->rotational_positon);
 
 		//w(t) = I-inv(t) * L(t)
 		obj->angular_velocity = dx::XMVector3Transform(obj->angular_momentum, I_inv);
@@ -203,9 +198,51 @@ void PhysicsSystem::SystemControls() {
 	ImGui::End();
 }
 
+void PhysicsSystem::UpdateDrawSprings() {
+	dx::XMFLOAT3 stick_a, stick_b;
+	stick_a.x = -stick_width;
+	stick_a.y = 0;
+	stick_a.z = 0;
+
+	stick_b.x = stick_width;
+	stick_b.y = 0;
+	stick_b.z = 0;
+
+	unsigned int indx = 0;
+	draw_spring_vertices[indx] = anchor_points[0];
+	indx++;
+	for (auto& obj : physics_objects) {
+		dx::XMFLOAT3 new_pos;
+		dx::XMStoreFloat3(
+			&new_pos,
+			dx::XMVectorAdd(
+				dx::XMVector3Transform(
+					dx::XMLoadFloat3(&stick_a),
+					obj->rotational_positon),
+				obj->position)
+		);
+		draw_spring_vertices[indx] = new_pos;
+	
+		indx++;
+		dx::XMStoreFloat3(
+			&new_pos,
+			dx::XMVectorAdd(
+				dx::XMVector3Transform(
+					dx::XMLoadFloat3(&stick_b),
+					obj->rotational_positon),
+				obj->position)
+		);
+		draw_spring_vertices[indx] = new_pos;
+		indx++;
+	}
+	draw_spring_vertices[indx] = anchor_points[1];
+
+	draw_spring->UpdateVertices(gfx_ref, draw_spring_vertices);
+}
+
 PhysicsSystem::PhysicsSystem(Graphics& gfx) : gfx_ref(gfx),
 	elapsed_time(0), use_method(IntegrateMethod::RK4), 
-	anchor_sphere_1(gfx, 5), anchor_sphere_2(gfx, 5), 
+	anchor_sphere_1(gfx, 5), anchor_sphere_2(gfx, 5), draw_spring(),
 	spring_coeff(100.0f), damper_coeff(100.0f) {
 
 	//Add gravitational force
@@ -213,6 +250,12 @@ PhysicsSystem::PhysicsSystem(Graphics& gfx) : gfx_ref(gfx),
 
 	anchor_points[0] = dx::XMFLOAT3(-20, 5, 0);
 	anchor_points[1] = dx::XMFLOAT3(20, 5, 0);
+
+	std::vector<dx::XMFLOAT3> curve_points{ anchor_points[0] , anchor_points[1] };
+
+	draw_spring_vertices.push_back(anchor_points[0]);
+	draw_spring_vertices.push_back(anchor_points[1]);
+	draw_spring = std::make_unique<Curve>(gfx, draw_spring_vertices);
 }
 
 PhysicsSystem::~PhysicsSystem() {
@@ -231,15 +274,9 @@ void PhysicsSystem::Derivative(PhysicsState& _input, PhysicsObject* _obj, Physic
 
 	//I-inv(t) = R(t) * Iobj-inv * R(t)-trans
 	dx::XMMATRIX I_inv =
-		_input.R * _obj->Iobj_inv * dx::XMMatrixTranspose(_input.R);
-
-	I_inv =
-		dx::XMMatrixMultiply(
-			dx::XMMatrixMultiply(
-				_input.R,
-				_obj->Iobj_inv
-			),
-			dx::XMMatrixTranspose(_input.R));
+		_input.R * 
+		dx::XMLoadFloat3x3(&_obj->Iobj_inv) * 
+		dx::XMMatrixTranspose(_input.R);
 
 	//w(t) = I-inv(t) * L(t)
 	dx::XMVECTOR omega = dx::XMVector3Transform(_input.L, I_inv);
@@ -358,7 +395,6 @@ void PhysicsSystem::UpdateStickForces(PhysicsObject* _obj) {
 					physics_objects[indx - 1]->rotational_positon),
 				TildeOperator(physics_objects[indx - 1]->angular_velocity)),
 			physics_objects[indx - 1]->velocity);
-
 		vi_next = dx::XMVectorAdd(
 			dx::XMVector3Transform(
 				dx::XMVector3Transform(
@@ -366,7 +402,6 @@ void PhysicsSystem::UpdateStickForces(PhysicsObject* _obj) {
 					physics_objects[indx + 1]->rotational_positon),
 				TildeOperator(physics_objects[indx + 1]->angular_velocity)),
 			physics_objects[indx + 1]->velocity);
-
 	}
 
 	qi_a = dx::XMVectorAdd(
@@ -400,7 +435,6 @@ void PhysicsSystem::UpdateStickForces(PhysicsObject* _obj) {
 				physics_objects[indx]->rotational_positon),
 			TildeOperator(physics_objects[indx]->angular_velocity)),
 		physics_objects[indx]->velocity);
-
 
 	//Calculate linear forces
 
@@ -443,6 +477,11 @@ void PhysicsSystem::AddPhysicsObject(const std::vector<std::pair<dx::XMFLOAT3, f
 	Polyhedron* draw_obj = new Polyhedron(gfx_ref, draw_vertices,
 		dx::XMFLOAT4(162.0f / 255, 0.0f / 255, 255.0f / 255, 255.0f / 255));
 	draw_objects.push_back(draw_obj);
+
+	//Add two vertices to the spring to be drawn
+	draw_spring_vertices.push_back(dx::XMFLOAT3());
+	draw_spring_vertices.push_back(dx::XMFLOAT3());
+	draw_spring = std::make_unique<Curve>(gfx_ref, draw_spring_vertices);
 }
 
 void PhysicsSystem::Update(float dt) {
@@ -461,6 +500,8 @@ void PhysicsSystem::Update(float dt) {
 		//Update the object positions with the new positions for this frame
 		obj->UpdatePositions();
 	}
+
+	UpdateDrawSprings();
 }
 
 void PhysicsSystem::Draw() {
@@ -477,6 +518,9 @@ void PhysicsSystem::Draw() {
 
 	anchor_sphere_1.Draw(gfx_ref);
 	anchor_sphere_2.Draw(gfx_ref);
+
+	draw_spring->Update(0.0f);
+	draw_spring->Draw(gfx_ref);
 }
 
 size_t PhysicsSystem::ObjectCount() {

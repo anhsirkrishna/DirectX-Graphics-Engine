@@ -1,6 +1,7 @@
 #pragma once
 #include "Graphics.h"
 #include "SolidSphere.h"
+#include "Curve.h"
 
 class Polyhedron;
 
@@ -91,6 +92,9 @@ private:
 	//Objects to render the anchor points
 	SolidSphere anchor_sphere_1;
 	SolidSphere anchor_sphere_2;
+	
+	std::unique_ptr<Curve> draw_spring;
+	std::vector<DirectX::XMFLOAT3> draw_spring_vertices;
 
 	//Stick width for stick-sprint system
 	//All objects are assumed to be uniformly wide sticks.
@@ -137,5 +141,10 @@ private:
 	* Window to display and controle the Physics system parameters
 	*/
 	void SystemControls();
+
+	/*
+	* Update the positions of the springs being being drawn
+	*/
+	void UpdateDrawSprings();
 };
 

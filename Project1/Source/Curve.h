@@ -1,10 +1,10 @@
 #pragma once
 class Curve : public DrawableBase<Curve> {
 public:
-	Curve(Graphics& gfx, const std::vector<dx::XMFLOAT3>& curve_points);
+	Curve(Graphics& gfx, const std::vector<DirectX::XMFLOAT3>& curve_points);
 	DirectX::XMMATRIX GetTransformXM() const noexcept override;
 	void Update(float dt) noexcept override;
-	void UpdateVertices(Graphics& gfx, const std::vector<dx::XMFLOAT3>& curve_points);
+	void UpdateVertices(Graphics& gfx, const std::vector<DirectX::XMFLOAT3>& curve_points);
 	void SetPosition(DirectX::XMFLOAT3 _pos);
 	void SetModelTransform();
 private:
