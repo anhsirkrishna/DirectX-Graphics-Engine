@@ -90,6 +90,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Project_Physics.cpp" />
+    <ClCompile Include="Source\Polyhedron.cpp" />
+    <ClCompile Include="Source\PhysicsSystem.cpp" />
+    <ClCompile Include="Source\PhysicsObject.cpp" />
     <ClCompile Include="Source\DrawPlane.cpp" />
     <ClCompile Include="Source\Project_SkeletonAnimation.cpp" />
     <ClCompile Include="Source\IKinematics.cpp" />
@@ -143,6 +147,10 @@
     <ClCompile Include="Source\SolidSphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Project_Physics.h" />
+    <ClInclude Include="Source\Polyhedron.h" />
+    <ClInclude Include="Source\PhysicsSystem.h" />
+    <ClInclude Include="Source\PhysicsObject.h" />
     <ClInclude Include="Source\Plane.h" />
     <ClInclude Include="Source\DrawPlane.h" />
     <ClInclude Include="Source\Project_SkeletonAnimation.h" />

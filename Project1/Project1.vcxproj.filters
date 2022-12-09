@@ -53,6 +53,9 @@
     <Filter Include="Source\Projects">
       <UniqueIdentifier>{53c25841-a54e-43a3-85a4-f435aa4d5a74}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Physics">
+      <UniqueIdentifier>{061dcc44-ea93-482e-8023-80451f8c665f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Window.cpp">
@@ -207,6 +210,18 @@
     </ClCompile>
     <ClCompile Include="Source\DrawPlane.cpp">
       <Filter>Source\Graphics\Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PhysicsObject.cpp">
+      <Filter>Source\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PhysicsSystem.cpp">
+      <Filter>Source\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Polyhedron.cpp">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Project_Physics.cpp">
+      <Filter>Source\Projects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -395,6 +410,18 @@
     </ClInclude>
     <ClInclude Include="Source\Plane.h">
       <Filter>Source\Graphics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PhysicsObject.h">
+      <Filter>Source\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PhysicsSystem.h">
+      <Filter>Source\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Polyhedron.h">
+      <Filter>Source\Graphics\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Project_Physics.h">
+      <Filter>Source\Projects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

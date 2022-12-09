@@ -9,6 +9,7 @@
 #include "Project_PathAnimation.h"
 #include "Project_IK.h"
 #include "Project_SkeletonAnimation.h"
+#include "Project_Physics.h"
 
 int WindowHeight = 720;
 int WindowWidth = 1280;
@@ -28,11 +29,14 @@ App::App() : window(WindowWidth, WindowHeight, TEXT("Direct3D Engine")) {
 	project_list.emplace_back(new Project_SkeletonAnimation(this));
 	project_list.emplace_back(new Project_PathAnimation(this));
 	project_list.emplace_back(new Project_IK(this));
+	project_list.emplace_back(new Project_Physics(this));
 	
-	active_project = project_list[0].get();
+	active_project = project_list[3].get();
 	
 	for (auto& proj : project_list)
 		proj->Setup();
+
+	active_project->Enter();
 }
 
 int App::Run() {

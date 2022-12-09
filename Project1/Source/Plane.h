@@ -81,17 +81,6 @@ public:
 		constexpr float side = 1.0f / 2.0f;
 
 		std::vector<V> vertices(4);
-		/*vertices[0].pos = { -side, 0, -side };
-		vertices[0].tex = { 0.0f, 0.0f};
-	
-		vertices[1].pos = { side, 0, -side };
-		vertices[1].tex = { 1.0f, 0.0f };
-
-		vertices[2].pos = { -side, 0, side };
-		vertices[2].tex = { 0.0f, 1.0f };
-
-		vertices[3].pos = { side, 0, side };
-		vertices[3].tex = { 1.0f, 1.0f };*/
 
 		vertices[0].pos = { -side,-side,-side };
 		vertices[0].tex = { 2.0f / 3.0f,0.0f / 4.0f };
