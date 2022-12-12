@@ -77,7 +77,7 @@ void PhysicsObject::CalculateIObj() {
 	Iobj = dx::XMFLOAT3X3(
 		 Ixx, -Ixy, -Ixz,
 		-Ixy,  Iyy, -Iyz,
-		-Ixz, -Iyz,  -Izz
+		-Ixz, -Iyz, -Izz
 	);
 
 

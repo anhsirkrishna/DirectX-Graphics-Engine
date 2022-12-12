@@ -66,6 +66,11 @@ public:
 
 	//Sets the uniform stick width
 	void SetStickWidth(float width);
+
+	//Anchor points that do not respond to the physics system
+	DirectX::XMFLOAT3 anchor_points[2];
+	unsigned int selected_anchor_point;
+
 private:
 	Graphics& gfx_ref;
 
@@ -75,6 +80,8 @@ private:
 		RK4
 	};
 	IntegrateMethod use_method;
+
+	bool apply_torque;
 
 	//Objects on which to perform the physics calculations
 	std::vector<PhysicsObject*> physics_objects;
@@ -87,8 +94,6 @@ private:
 	DirectX::XMVECTOR total_global_force;
 	DirectX::XMVECTOR total_global_torque;
 	
-	//Anchor points that do not respond to the physics system
-	DirectX::XMFLOAT3 anchor_points[2];
 	//Objects to render the anchor points
 	SolidSphere anchor_sphere_1;
 	SolidSphere anchor_sphere_2;
@@ -146,5 +151,10 @@ private:
 	* Update the positions of the springs being being drawn
 	*/
 	void UpdateDrawSprings();
+
+	/*
+	* Sets the anchor point position
+	*/
+	void SetAnchorPoint(unsigned int indx, DirectX::XMFLOAT3 point_pos);
 };
 

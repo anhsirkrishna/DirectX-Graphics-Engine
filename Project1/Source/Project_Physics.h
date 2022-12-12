@@ -30,7 +30,7 @@ public:
 	/*
 	* Control the Project prameters
 	*/
-	void ProjectControls();
+	void ProjectControls(float dt);
 private:
 	PhysicsSystem physics_system;
 	//Template for the physics object

@@ -110,7 +110,6 @@ void PhysicsSystem::SystemControls() {
 	if (ImGui::Begin("Physics controls")) {
 
 		if (ImGui::BeginMenu("Integration Method")) {
-			if (ImGui::MenuItem("Euler", "", use_method == IntegrateMethod::EULER)) use_method = IntegrateMethod::EULER;
 			if (ImGui::MenuItem("Runge-Kutta 4th", "", use_method == IntegrateMethod::RK4)) use_method = IntegrateMethod::RK4;
 			ImGui::EndMenu();
 		}
@@ -139,61 +138,35 @@ void PhysicsSystem::SystemControls() {
 			indx++;
 		}
 
-		if (ImGui::Button("Add Global Torque")) {
-			global_torques.push_back(dx::XMVectorZero());
-		}
-		ImGui::Text("Global Torques :");
-		indx = 0;
-		for (auto& torque : global_torques) {
-			float torque_val[3] = {
-				dx::XMVectorGetX(torque),
-				dx::XMVectorGetY(torque),
-				dx::XMVectorGetZ(torque)
-			};
-			std::string str = "Global Torque " + std::to_string(indx);
-			ImGui::SliderFloat3(str.c_str(), torque_val, -10, 10);
-			torque =
-				dx::XMVectorSet(torque_val[0], torque_val[1], torque_val[2], 0.0f);
-			indx++;
+		//=========================================
+		//float anchor_1_pos[3] = {
+		//	anchor_points[0].x,
+		//	anchor_points[0].y,
+		//	anchor_points[0].z
+		//};
+		//ImGui::SliderFloat3("Anchor Point 1 pos", anchor_1_pos, -50, 50);
+		//anchor_points[0].x = anchor_1_pos[0];
+		//anchor_points[0].y = anchor_1_pos[1];
+		//anchor_points[0].z = anchor_1_pos[2];
+
+		////=========================================
+		//float anchor_2_pos[3] = {
+		//	anchor_points[1].x,
+		//	anchor_points[1].y,
+		//	anchor_points[1].z
+		//};
+		//ImGui::SliderFloat3("Anchor Point 2 pos", anchor_2_pos, -50, 50);
+		//anchor_points[1].x = anchor_2_pos[0];
+		//anchor_points[1].y = anchor_2_pos[1];
+		//anchor_points[1].z = anchor_2_pos[2];
+
+		if (ImGui::BeginMenu("Selected Anchor point")) {
+			if (ImGui::MenuItem("Left", "", selected_anchor_point == 0)) selected_anchor_point = 0;
+			if (ImGui::MenuItem("Right", "", selected_anchor_point == 1)) selected_anchor_point = 1;
+			ImGui::EndMenu();
 		}
 
 		//=========================================
-		float anchor_1_pos[3] = {
-			anchor_points[0].x,
-			anchor_points[0].y,
-			anchor_points[0].z
-		};
-		ImGui::SliderFloat3("Anchor Point 1 pos", anchor_1_pos, -50, 50);
-		anchor_points[0].x = anchor_1_pos[0];
-		anchor_points[0].y = anchor_1_pos[1];
-		anchor_points[0].z = anchor_1_pos[2];
-
-		//=========================================
-		float anchor_2_pos[3] = {
-			anchor_points[1].x,
-			anchor_points[1].y,
-			anchor_points[1].z
-		};
-		ImGui::SliderFloat3("Anchor Point 2 pos", anchor_2_pos, -50, 50);
-		anchor_points[1].x = anchor_2_pos[0];
-		anchor_points[1].y = anchor_2_pos[1];
-		anchor_points[1].z = anchor_2_pos[2];
-
-		//=========================================
-
-		indx = 0;
-		for (auto& obj : physics_objects) {
-			float obj_pos[3] = {
-				dx::XMVectorGetX(obj->position),
-				dx::XMVectorGetY(obj->position),
-				dx::XMVectorGetZ(obj->position)
-			};
-			std::string str = "Object " + std::to_string(indx) +  "position";
-			ImGui::SliderFloat3(str.c_str(), obj_pos, -100, 100);
-			obj->position = 
-				dx::XMVectorSet(obj_pos[0], obj_pos[1], obj_pos[2], 0.0f);
-			indx++;
-		}
 	}
 	ImGui::End();
 }
@@ -238,6 +211,10 @@ void PhysicsSystem::UpdateDrawSprings() {
 	draw_spring_vertices[indx] = anchor_points[1];
 
 	draw_spring->UpdateVertices(gfx_ref, draw_spring_vertices);
+}
+
+void PhysicsSystem::SetAnchorPoint(unsigned int indx, dx::XMFLOAT3 point_pos) {
+	anchor_points[indx] = point_pos;
 }
 
 PhysicsSystem::PhysicsSystem(Graphics& gfx) : gfx_ref(gfx),
@@ -468,7 +445,16 @@ void PhysicsSystem::AddPhysicsObject(const std::vector<std::pair<dx::XMFLOAT3, f
 	anchor_points[1].x += 5;
 
 
+	for (auto& obj : physics_objects) {
+		obj->position =
+			dx::XMVectorSetX(obj->position,
+				dx::XMVectorGetX(obj->position) - 20);
+	}
+
 	PhysicsObject* phy_obj = new PhysicsObject(vertices);
+	phy_obj->position =
+		dx::XMVectorSet(anchor_points[1].x-10.0f, anchor_points[1].y, anchor_points[1].z, 0.0f);
+
 	physics_objects.push_back(phy_obj);
 
 	std::vector<dx::XMFLOAT3> draw_vertices;
@@ -499,6 +485,7 @@ void PhysicsSystem::Update(float dt) {
 
 		//Update the object positions with the new positions for this frame
 		obj->UpdatePositions();
+
 	}
 
 	UpdateDrawSprings();

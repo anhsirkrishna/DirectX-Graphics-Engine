@@ -50,6 +50,10 @@ Project_Physics::Project_Physics(App* _p_parent_app) :
 void Project_Physics::Setup() {
 	physics_system.AddPhysicsObject(obj_vertices);
 	physics_system.AddPhysicsObject(obj_vertices);
+	physics_system.AddPhysicsObject(obj_vertices);
+	physics_system.AddPhysicsObject(obj_vertices);
+	physics_system.AddPhysicsObject(obj_vertices);
+	physics_system.AddPhysicsObject(obj_vertices);
 }
 
 void Project_Physics::Enter() {
@@ -58,7 +62,7 @@ void Project_Physics::Enter() {
 }
 
 void Project_Physics::Update(float dt) {
-	ProjectControls();
+	ProjectControls(dt);
 	physics_system.Update(dt);
 }
 
@@ -66,17 +70,20 @@ void Project_Physics::Draw() {
 	physics_system.Draw();
 }
 
-void Project_Physics::ProjectControls() {
-	if (ImGui::Begin("PhyProject controls")) {
-		//=========================================
-		if (physics_system.ObjectCount() == max_objects) {
-			ImGui::Text("Max Object Limit");
-		}
-		else {
-			if (ImGui::Button("Add Stick")) {
-				physics_system.AddPhysicsObject(obj_vertices);
-			}
-		}
+void Project_Physics::ProjectControls(float dt) {
+	Window& window_ref = p_parent_app->GetWindow();
+	unsigned int indx = physics_system.selected_anchor_point;
+	if (window_ref.keyboard.isKeyPressed(VK_RIGHT)) {
+		physics_system.anchor_points[indx].x = dx::XMMin(80.0f, physics_system.anchor_points[indx].x + (dt * 50));
 	}
-	ImGui::End();
+	if (window_ref.keyboard.isKeyPressed(VK_LEFT)) {
+		physics_system.anchor_points[indx].x = dx::XMMax(-80.0f, physics_system.anchor_points[indx].x - (dt * 50));
+	}
+
+	if (window_ref.keyboard.isKeyPressed(VK_UP)) {
+		physics_system.anchor_points[indx].y = dx::XMMin(50.0f, physics_system.anchor_points[indx].y + (dt * 50));
+	}
+	if (window_ref.keyboard.isKeyPressed(VK_DOWN)) {
+		physics_system.anchor_points[indx].y = dx::XMMax(-50.0f, physics_system.anchor_points[indx].y - (dt * 50));
+	}
 }
