@@ -8,38 +8,50 @@ class Polyhedron;
 struct PhysicsState
 {
 	//Position
-	DirectX::XMVECTOR c;
+	DirectX::XMFLOAT3 c;
 	//Angular position
-	DirectX::XMMATRIX R;
+	DirectX::XMFLOAT3X3 R;
 
 	//Momentum
-	DirectX::XMVECTOR P;
+	DirectX::XMFLOAT3 P;
 	//Angular momentum
-	DirectX::XMVECTOR L;
+	DirectX::XMFLOAT3 L;
 
 	void Scale(float t) {
-		c = DirectX::XMVectorScale(c, t);
-		R = R * t;
-		P = DirectX::XMVectorScale(P, t);
-		L = DirectX::XMVectorScale(L, t);
+		DirectX::XMStoreFloat3(&c,
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&c), t));
+		DirectX::XMStoreFloat3x3(&R, 
+			DirectX::XMLoadFloat3x3(&R) * t);
+		DirectX::XMStoreFloat3(&P,
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&P), t));
+		DirectX::XMStoreFloat3(&L, 
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&L), t));
 	}
 
 	PhysicsState operator+(const PhysicsState& _other) const {
 		PhysicsState ret_state;
-		ret_state.c = DirectX::XMVectorAdd(c, _other.c);
-		ret_state.R = R + _other.R;
-		ret_state.P = DirectX::XMVectorAdd(P, _other.P);
-		ret_state.L = DirectX::XMVectorAdd(L, _other.L);
+		DirectX::XMStoreFloat3(&ret_state.c,
+			DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&c), DirectX::XMLoadFloat3(&_other.c)));
+		DirectX::XMStoreFloat3x3(&ret_state.R,
+			DirectX::XMLoadFloat3x3(&R) + DirectX::XMLoadFloat3x3(&_other.R));
+		DirectX::XMStoreFloat3(&ret_state.P, 
+			DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&P), DirectX::XMLoadFloat3(&_other.P)));
+		DirectX::XMStoreFloat3(&ret_state.L, 
+			DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&L), DirectX::XMLoadFloat3(&_other.L)));
 
 		return ret_state;
 	}
 
 	PhysicsState operator*(float m) const {
 		PhysicsState ret_state;
-		ret_state.c = DirectX::XMVectorScale(c, m);
-		ret_state.R = R * m;
-		ret_state.P = DirectX::XMVectorScale(P, m);
-		ret_state.L = DirectX::XMVectorScale(L, m);
+		DirectX::XMStoreFloat3(&ret_state.c, 
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&c), m));
+		DirectX::XMStoreFloat3x3(&ret_state.R,
+			DirectX::XMLoadFloat3x3(&R) * m );
+		DirectX::XMStoreFloat3(&ret_state.P, 
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&P), m));
+		DirectX::XMStoreFloat3(&ret_state.L, 
+			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&L), m));
 
 		return ret_state;
 	}

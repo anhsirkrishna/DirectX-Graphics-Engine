@@ -91,16 +91,18 @@ void PhysicsSystem::CalculateAllTorques() {
 void PhysicsSystem::CalculateVelocities() {
 	for (auto& obj : physics_objects) {
 		//c'(t) = v(t) = P(t)/M
-		obj->velocity = dx::XMVectorScale(obj->momentum, 1.0f / obj->mass);
+		dx::XMStoreFloat3(&obj->velocity, 
+			dx::XMVectorScale(dx::XMLoadFloat3(&obj->momentum), 1.0f / obj->mass));
 
 		//I-inv(t) = R(t) * Iobj-inv * R(t)-trans
 		dx::XMMATRIX I_inv =
-			obj->rotational_positon * 
+			dx::XMMatrixTranspose(dx::XMLoadFloat3x3(&obj->rotational_positon)) *
 			dx::XMLoadFloat3x3(&obj->Iobj_inv) * 
-			dx::XMMatrixTranspose(obj->rotational_positon);
+			dx::XMLoadFloat3x3(&obj->rotational_positon);
 
 		//w(t) = I-inv(t) * L(t)
-		obj->angular_velocity = dx::XMVector3Transform(obj->angular_momentum, I_inv);
+		dx::XMStoreFloat3(&obj->angular_velocity, 
+			dx::XMVector3Transform(dx::XMLoadFloat3(&obj->angular_momentum), I_inv));
 	}
 	
 }
@@ -139,26 +141,26 @@ void PhysicsSystem::SystemControls() {
 		}
 
 		//=========================================
-		//float anchor_1_pos[3] = {
-		//	anchor_points[0].x,
-		//	anchor_points[0].y,
-		//	anchor_points[0].z
-		//};
-		//ImGui::SliderFloat3("Anchor Point 1 pos", anchor_1_pos, -50, 50);
-		//anchor_points[0].x = anchor_1_pos[0];
-		//anchor_points[0].y = anchor_1_pos[1];
-		//anchor_points[0].z = anchor_1_pos[2];
+		float anchor_1_pos[3] = {
+			anchor_points[0].x,
+			anchor_points[0].y,
+			anchor_points[0].z
+		};
+		ImGui::SliderFloat3("Anchor Point 1 pos", anchor_1_pos, -50, 50);
+		anchor_points[0].x = anchor_1_pos[0];
+		anchor_points[0].y = anchor_1_pos[1];
+		anchor_points[0].z = anchor_1_pos[2];
 
-		////=========================================
-		//float anchor_2_pos[3] = {
-		//	anchor_points[1].x,
-		//	anchor_points[1].y,
-		//	anchor_points[1].z
-		//};
-		//ImGui::SliderFloat3("Anchor Point 2 pos", anchor_2_pos, -50, 50);
-		//anchor_points[1].x = anchor_2_pos[0];
-		//anchor_points[1].y = anchor_2_pos[1];
-		//anchor_points[1].z = anchor_2_pos[2];
+		//=========================================
+		float anchor_2_pos[3] = {
+			anchor_points[1].x,
+			anchor_points[1].y,
+			anchor_points[1].z
+		};
+		ImGui::SliderFloat3("Anchor Point 2 pos", anchor_2_pos, -50, 50);
+		anchor_points[1].x = anchor_2_pos[0];
+		anchor_points[1].y = anchor_2_pos[1];
+		anchor_points[1].z = anchor_2_pos[2];
 
 		if (ImGui::BeginMenu("Selected Anchor point")) {
 			if (ImGui::MenuItem("Left", "", selected_anchor_point == 0)) selected_anchor_point = 0;
@@ -173,11 +175,11 @@ void PhysicsSystem::SystemControls() {
 
 void PhysicsSystem::UpdateDrawSprings() {
 	dx::XMFLOAT3 stick_a, stick_b;
-	stick_a.x = -stick_width;
+	stick_a.x = stick_width;
 	stick_a.y = 0;
 	stick_a.z = 0;
 
-	stick_b.x = stick_width;
+	stick_b.x = -stick_width;
 	stick_b.y = 0;
 	stick_b.z = 0;
 
@@ -191,8 +193,8 @@ void PhysicsSystem::UpdateDrawSprings() {
 			dx::XMVectorAdd(
 				dx::XMVector3Transform(
 					dx::XMLoadFloat3(&stick_a),
-					obj->rotational_positon),
-				obj->position)
+					dx::XMLoadFloat3x3(&obj->rotational_positon)),
+				dx::XMLoadFloat3(&obj->position))
 		);
 		draw_spring_vertices[indx] = new_pos;
 	
@@ -202,8 +204,8 @@ void PhysicsSystem::UpdateDrawSprings() {
 			dx::XMVectorAdd(
 				dx::XMVector3Transform(
 					dx::XMLoadFloat3(&stick_b),
-					obj->rotational_positon),
-				obj->position)
+					dx::XMLoadFloat3x3(&obj->rotational_positon)),
+				dx::XMLoadFloat3(&obj->position))
 		);
 		draw_spring_vertices[indx] = new_pos;
 		indx++;
@@ -247,20 +249,21 @@ PhysicsSystem::~PhysicsSystem() {
 
 void PhysicsSystem::Derivative(PhysicsState& _input, PhysicsObject* _obj, PhysicsState& _output) {
 	//c`(t) = v(t) = P(t)/M
-	_output.c = dx::XMVectorScale(_input.P, 1.0f / _obj->mass);
+	dx::XMStoreFloat3(&_output.c, 
+		dx::XMVectorScale(dx::XMLoadFloat3(&_input.P), 1.0f / _obj->mass));
 
 	//I-inv(t) = R(t) * Iobj-inv * R(t)-trans
 	dx::XMMATRIX I_inv =
-		_input.R * 
+		dx::XMMatrixTranspose(dx::XMLoadFloat3x3(&_input.R)) *
 		dx::XMLoadFloat3x3(&_obj->Iobj_inv) * 
-		dx::XMMatrixTranspose(_input.R);
+		dx::XMLoadFloat3x3(&_input.R);
 
 	//w(t) = I-inv(t) * L(t)
-	dx::XMVECTOR omega = dx::XMVector3Transform(_input.L, I_inv);
+	dx::XMVECTOR omega = dx::XMVector3Transform(dx::XMLoadFloat3(&_input.L), I_inv);
 
 	//R`(t) = ~w(t) * R(t)
-	_output.R = TildeOperator(omega) * _input.R;
-	_output.R = dx::XMMatrixMultiply(TildeOperator(omega), _input.R);
+	dx::XMStoreFloat3x3(&_output.R,
+		dx::XMLoadFloat3x3(&_input.R) * TildeOperator(omega));
 
 	//P`(t) = F(t)
 	dx::XMVECTOR F = dx::XMVectorAdd(
@@ -268,10 +271,12 @@ void PhysicsSystem::Derivative(PhysicsState& _input, PhysicsObject* _obj, Physic
 		dx::XMVectorScale(gravity,
 			_obj->mass)
 	);
-	_output.P = dx::XMVectorAdd(_obj->force, F);
+	dx::XMStoreFloat3(&_output.P, 
+		dx::XMVectorAdd(dx::XMLoadFloat3(&_obj->force), F));
 
 	//L`(t) = T(t)
-	_output.L = dx::XMVectorAdd(_obj->torque, total_global_torque);
+	dx::XMStoreFloat3(&_output.L, 
+		dx::XMVectorAdd(dx::XMLoadFloat3(&_obj->torque), total_global_torque));
 }
 
 void PhysicsSystem::Integrate(PhysicsObject* _obj, float dt){
@@ -310,19 +315,19 @@ void PhysicsSystem::UpdateStickForces(PhysicsObject* _obj) {
 		qi_next = dx::XMVectorAdd(
 			dx::XMVector3Transform(
 				dx::XMLoadFloat3(&stick_a),
-				physics_objects[indx + 1]->rotational_positon
+				dx::XMLoadFloat3x3(&physics_objects[indx + 1]->rotational_positon)
 			),
-			physics_objects[indx + 1]->position
+			dx::XMLoadFloat3(&physics_objects[indx + 1]->position)
 		);
 			
 		vi_prev = dx::XMVectorZero();
 		vi_next = dx::XMVectorAdd(
-			dx::XMVector3Transform(
+			dx::XMVector3Cross(
+				dx::XMLoadFloat3(&physics_objects[indx + 1]->angular_velocity),
 				dx::XMVector3Transform(
 					dx::XMLoadFloat3(&stick_a),
-					physics_objects[indx + 1]->rotational_positon),
-				TildeOperator(physics_objects[indx + 1]->angular_velocity)),
-			physics_objects[indx + 1]->velocity);
+					dx::XMLoadFloat3x3(&physics_objects[indx + 1]->rotational_positon))),
+			dx::XMLoadFloat3(&physics_objects[indx + 1]->velocity));
 	}
 	else if (indx == physics_objects.size() - 1)
 	{
@@ -332,19 +337,19 @@ void PhysicsSystem::UpdateStickForces(PhysicsObject* _obj) {
 		qi_prev = dx::XMVectorAdd(
 			dx::XMVector3Transform(
 				dx::XMLoadFloat3(&stick_b),
-				physics_objects[indx - 1]->rotational_positon
+				dx::XMLoadFloat3x3(&physics_objects[indx - 1]->rotational_positon)
 			),
-			physics_objects[indx - 1]->position
+			dx::XMLoadFloat3(&physics_objects[indx - 1]->position)
 		);
 		qi_next = dx::XMLoadFloat3(&anchor_points[1]);
 
 		vi_prev = dx::XMVectorAdd(
-			dx::XMVector3Transform(
+			dx::XMVector3Cross(
+				dx::XMLoadFloat3(&physics_objects[indx - 1]->angular_velocity),
 				dx::XMVector3Transform(
 					dx::XMLoadFloat3(&stick_b),
-					physics_objects[indx - 1]->rotational_positon),
-				TildeOperator(physics_objects[indx - 1]->angular_velocity)),
-			physics_objects[indx - 1]->velocity);
+					dx::XMLoadFloat3x3(&physics_objects[indx - 1]->rotational_positon))),
+			dx::XMLoadFloat3(&physics_objects[indx - 1]->velocity));
 		vi_next = dx::XMVectorZero();
 	}
 	else
@@ -352,66 +357,67 @@ void PhysicsSystem::UpdateStickForces(PhysicsObject* _obj) {
 		qi_prev = dx::XMVectorAdd(
 			dx::XMVector3Transform(
 				dx::XMLoadFloat3(&stick_b),
-				physics_objects[indx - 1]->rotational_positon
+				dx::XMLoadFloat3x3(&physics_objects[indx - 1]->rotational_positon)
 			),
-			physics_objects[indx - 1]->position
+			dx::XMLoadFloat3(&physics_objects[indx - 1]->position)
 		);
 
 		qi_next = dx::XMVectorAdd(
 			dx::XMVector3Transform(
 				dx::XMLoadFloat3(&stick_a),
-				physics_objects[indx + 1]->rotational_positon
+				dx::XMLoadFloat3x3(&physics_objects[indx + 1]->rotational_positon)
 			),
-			physics_objects[indx + 1]->position
+			dx::XMLoadFloat3(&physics_objects[indx + 1]->position)
 		);
 
 		vi_prev = dx::XMVectorAdd(
-			dx::XMVector3Transform(
+			dx::XMVector3Cross(
+				dx::XMLoadFloat3(&physics_objects[indx - 1]->angular_velocity),
 				dx::XMVector3Transform(
 					dx::XMLoadFloat3(&stick_b),
-					physics_objects[indx - 1]->rotational_positon),
-				TildeOperator(physics_objects[indx - 1]->angular_velocity)),
-			physics_objects[indx - 1]->velocity);
+					dx::XMLoadFloat3x3(&physics_objects[indx - 1]->rotational_positon))),
+			dx::XMLoadFloat3(&physics_objects[indx - 1]->velocity));
+		
 		vi_next = dx::XMVectorAdd(
-			dx::XMVector3Transform(
+			dx::XMVector3Cross(
+				dx::XMLoadFloat3(&physics_objects[indx + 1]->angular_velocity),
 				dx::XMVector3Transform(
 					dx::XMLoadFloat3(&stick_a),
-					physics_objects[indx + 1]->rotational_positon),
-				TildeOperator(physics_objects[indx + 1]->angular_velocity)),
-			physics_objects[indx + 1]->velocity);
+					dx::XMLoadFloat3x3(&physics_objects[indx + 1]->rotational_positon))),
+			dx::XMLoadFloat3(&physics_objects[indx + 1]->velocity));
 	}
 
 	qi_a = dx::XMVectorAdd(
 		dx::XMVector3Transform(
 			dx::XMLoadFloat3(&stick_a),
-			physics_objects[indx]->rotational_positon
+			dx::XMLoadFloat3x3(&physics_objects[indx]->rotational_positon)
 		),
-		physics_objects[indx]->position
+		dx::XMLoadFloat3(&physics_objects[indx]->position)
 	);
 
 	qi_b = dx::XMVectorAdd(
 		dx::XMVector3Transform(
 			dx::XMLoadFloat3(&stick_b),
-			physics_objects[indx]->rotational_positon
+			dx::XMLoadFloat3x3(&physics_objects[indx]->rotational_positon)
 		),
-		physics_objects[indx]->position
+		dx::XMLoadFloat3(&physics_objects[indx]->position)
 	);
 
 	vi_a = dx::XMVectorAdd(
-		dx::XMVector3Transform(
+		dx::XMVector3Cross(
+			dx::XMLoadFloat3(&physics_objects[indx]->angular_velocity),
 			dx::XMVector3Transform(
 				dx::XMLoadFloat3(&stick_a),
-				physics_objects[indx]->rotational_positon),
-			TildeOperator(physics_objects[indx]->angular_velocity)),
-		physics_objects[indx]->velocity);
+				dx::XMLoadFloat3x3(&physics_objects[indx]->rotational_positon))),
+		dx::XMLoadFloat3(&physics_objects[indx]->velocity));
 
 	vi_b = dx::XMVectorAdd(
-		dx::XMVector3Transform(
+		dx::XMVector3Cross(
+			dx::XMLoadFloat3(&physics_objects[indx]->angular_velocity),
 			dx::XMVector3Transform(
 				dx::XMLoadFloat3(&stick_b),
-				physics_objects[indx]->rotational_positon),
-			TildeOperator(physics_objects[indx]->angular_velocity)),
-		physics_objects[indx]->velocity);
+				dx::XMLoadFloat3x3(&physics_objects[indx]->rotational_positon))),
+		dx::XMLoadFloat3(&physics_objects[indx]->velocity));
 
 	//Calculate linear forces
 
@@ -423,20 +429,19 @@ void PhysicsSystem::UpdateStickForces(PhysicsObject* _obj) {
 		dx::XMVectorScale(dx::XMVectorSubtract(qi_next, qi_b), spring_coeff),
 		dx::XMVectorScale(dx::XMVectorSubtract(vi_next, vi_b), damper_coeff));
 
-	_obj->force = dx::XMVectorAdd(fa, fb);
+	dx::XMStoreFloat3(&_obj->force, dx::XMVectorAdd(fa, fb));
 
 
 	//Calculate angular forces
 	ta = dx::XMVector3Cross(
-		dx::XMVectorSubtract(qi_a, physics_objects[indx]->position),
+		dx::XMVectorSubtract(qi_a, dx::XMLoadFloat3(&physics_objects[indx]->position)),
 		fa);
 
 	tb = dx::XMVector3Cross(
-		dx::XMVectorSubtract(qi_b, physics_objects[indx]->position),
+		dx::XMVectorSubtract(qi_b, dx::XMLoadFloat3(&physics_objects[indx]->position)),
 		fb);
 	
-	_obj->torque = dx::XMVectorAdd(ta, tb);
-		
+	dx::XMStoreFloat3(&_obj->torque, dx::XMVectorAdd(ta, tb));
 }
 
 void PhysicsSystem::AddPhysicsObject(const std::vector<std::pair<dx::XMFLOAT3, float>>& vertices) {
@@ -446,14 +451,12 @@ void PhysicsSystem::AddPhysicsObject(const std::vector<std::pair<dx::XMFLOAT3, f
 
 
 	for (auto& obj : physics_objects) {
-		obj->position =
-			dx::XMVectorSetX(obj->position,
-				dx::XMVectorGetX(obj->position) - 20);
+		obj->position.x -= 20.0f;
 	}
 
 	PhysicsObject* phy_obj = new PhysicsObject(vertices);
-	phy_obj->position =
-		dx::XMVectorSet(anchor_points[1].x-10.0f, anchor_points[1].y, anchor_points[1].z, 0.0f);
+	phy_obj->position = anchor_points[1];
+	phy_obj->position.x -= 10.0f;
 
 	physics_objects.push_back(phy_obj);
 

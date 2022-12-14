@@ -19,8 +19,8 @@ void PhysicsObject::UpdatePositions() {
 	for (auto& vertex : vertices) {
 		dx::XMVECTOR updated_pos =
 			dx::XMVectorAdd(
-				dx::XMVector3Transform(vertex.position, rotational_positon),
-				position);
+				dx::XMVector3Transform(vertex.position, dx::XMLoadFloat3x3(&rotational_positon)),
+				dx::XMLoadFloat3(&position));
 
 		dx::XMStoreFloat3(&vertex_positions[indx], updated_pos);
 		indx++;
@@ -30,9 +30,10 @@ void PhysicsObject::UpdatePositions() {
 PhysicsObject::PhysicsObject() :
 	vertices(), mass(0), center_of_mass(), 
 	Iobj(), Iobj_inv(),
-	position(dx::XMVectorZero()), rotational_positon(dx::XMMatrixIdentity()),
-	force(dx::XMVectorZero()), momentum(dx::XMVectorZero()), velocity(dx::XMVectorZero()),
-	torque(dx::XMVectorZero()), angular_momentum(dx::XMVectorZero()), angular_velocity(dx::XMVectorZero()) {
+	position(), rotational_positon(),
+	force(), momentum(), velocity(),
+	torque(), angular_momentum(), angular_velocity() {
+	dx::XMStoreFloat3x3(&rotational_positon, dx::XMMatrixIdentity());
 }
 
 PhysicsObject::PhysicsObject(std::vector<DirectX::XMFLOAT3> positions, std::vector<float> masses) :
@@ -77,7 +78,7 @@ void PhysicsObject::CalculateIObj() {
 	Iobj = dx::XMFLOAT3X3(
 		 Ixx, -Ixy, -Ixz,
 		-Ixy,  Iyy, -Iyz,
-		-Ixz, -Iyz, -Izz
+		-Ixz, -Iyz,  Izz
 	);
 
 
@@ -115,10 +116,14 @@ void PhysicsObject::CalculateIObj() {
 }
 
 void PhysicsObject::Add(const PhysicsState& _other) {
-	position = dx::XMVectorAdd(position, _other.c);
-	rotational_positon = rotational_positon + _other.R;
-	momentum = dx::XMVectorAdd(momentum, _other.P);
-	angular_momentum = dx::XMVectorAdd(angular_momentum, _other.L);
+	dx::XMStoreFloat3(&position,
+	 dx::XMVectorAdd(dx::XMLoadFloat3(&position), dx::XMLoadFloat3(&_other.c)));
+	dx::XMStoreFloat3x3(&rotational_positon, 
+		dx::XMLoadFloat3x3(&rotational_positon) + dx::XMLoadFloat3x3(&_other.R));
+	dx::XMStoreFloat3(&momentum, 
+		dx::XMVectorAdd(dx::XMLoadFloat3(&momentum), dx::XMLoadFloat3(&_other.P)));
+	dx::XMStoreFloat3(&angular_momentum, 
+		dx::XMVectorAdd(dx::XMLoadFloat3(&angular_momentum), dx::XMLoadFloat3(&_other.L)));
 }
 
 const std::vector<DirectX::XMFLOAT3>& PhysicsObject::GetVertexPositions() {

@@ -49,19 +49,19 @@ private:
 	DirectX::XMFLOAT3X3 Iobj_inv;
 
 	//x(t) == c(t)
-	DirectX::XMVECTOR position;
+	DirectX::XMFLOAT3 position;
 	//R(t)
-	DirectX::XMMATRIX rotational_positon;
+	DirectX::XMFLOAT3X3 rotational_positon;
 
 	//Linear components
-	DirectX::XMVECTOR force;
-	DirectX::XMVECTOR momentum;
-	DirectX::XMVECTOR velocity;
+	DirectX::XMFLOAT3 force;
+	DirectX::XMFLOAT3 momentum;
+	DirectX::XMFLOAT3 velocity;
 	
 	//Angular components
-	DirectX::XMVECTOR torque;
-	DirectX::XMVECTOR angular_momentum;
-	DirectX::XMVECTOR angular_velocity;
+	DirectX::XMFLOAT3 torque;
+	DirectX::XMFLOAT3 angular_momentum;
+	DirectX::XMFLOAT3 angular_velocity;
 
 	/*
 	* Move the object (along with all vertices) so that the centre of mass 
